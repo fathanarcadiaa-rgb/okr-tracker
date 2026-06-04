@@ -57,6 +57,11 @@ input,textarea,select{font-family:'Sora',sans-serif;}
 .btn-outline:hover{border-color:var(--red);color:var(--red);}
 .btn-ghost{background:transparent;color:var(--ink3);border:none;padding:6px 10px;}
 .btn-ghost:hover{color:var(--red);}
+.btn-danger{background:var(--danger);color:#fff;font-size:10px;padding:4px 10px;}
+.btn-danger:hover{background:#b91c1c;box-shadow:0 2px 6px rgba(220,38,38,.3);}
+.add-scope-row{display:flex;gap:8px;align-items:center;margin-bottom:16px;padding:12px;background:var(--bg2);border-radius:var(--radius);border:1px dashed var(--line);}
+.scope-dropdown{font-size:12px;padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;color:var(--ink);font-family:'Sora',sans-serif;outline:none;min-width:200px;}
+.scope-dropdown:focus{border-color:var(--red);}
 .btn-sm{font-size:11px;padding:5px 12px;}
 
 /* ── HEADER ── */
@@ -156,6 +161,9 @@ input,textarea,select{font-family:'Sora',sans-serif;}
 
 /* ── NOTE INPUT ── */
 .note-inp{font-size:11px;color:var(--ink2);background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:3px 7px;outline:none;width:140px;transition:border-color .15s;font-family:'Sora',sans-serif;}
+.note-inp:focus{border-color:var(--red);}
+.prog-inp{font-size:11px;color:var(--ink2);background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:3px 5px;outline:none;transition:border-color .15s;font-family:'JetBrains Mono',monospace;}
+.prog-inp:focus{border-color:var(--red);}
 .note-inp:focus{border-color:var(--red);}
 
 /* ── FILTER CHIPS ── */
@@ -352,9 +360,15 @@ td{padding:9px 12px;vertical-align:middle;}
     </div>
   </div>
   <div class="filter-row" id="wlog-filter-row"></div>
+  <div class="add-scope-row">
+    <span style="font-size:12px;color:var(--ink);font-weight:600">➕ Add Scope to This Week:</span>
+    <select class="scope-dropdown" id="add-scope-sel" onchange="addScopeToWeek(this.value); this.value='';">
+      <option value="">— Select scope —</option>
+    </select>
+  </div>
   <div class="tbl-wrap">
     <table>
-      <thead><tr><th>#</th><th>Scope</th><th>Item</th><th>Batch</th><th>Owner</th><th>Status</th><th>History 5W</th><th>Catatan</th></tr></thead>
+      <thead><tr><th>#</th><th>Scope</th><th>Item</th><th>Batch</th><th>Owner</th><th>Status</th><th>Progress</th><th>History 5W</th><th>Catatan</th><th></th></tr></thead>
       <tbody id="wlog-body"></tbody>
     </table>
   </div>
@@ -456,6 +470,10 @@ async function loadData() {
     DB.weekly  = data.weekly  || [];
     DB.okr     = data.okr     || [];
     DB.kr_weekly = data.kr_weekly || [];
+    
+    // Auto-generate missing weekly log rows untuk minggu ini
+    await autoGenerateMissingWeeklyRows();
+    
     saveLocal();
     syncStatus('ok');
   } catch(e) {
@@ -467,21 +485,57 @@ async function loadData() {
   renderAll();
 }
 
+// Auto-generate missing rows di weekly_log untuk scope-scope baru minggu ini
+async function autoGenerateMissingWeeklyRows() {
+  if (!GAS_URL) return; // Only if connected to Sheets
+  const wid = weekId(0); // Current week
+  const existingIds = new Set(DB.weekly.filter(r => r.week_id === wid).map(r => String(r.scope_id)));
+  const now = new Date().toISOString();
+  let added = 0;
+  
+  for (const scope of DB.scopes) {
+    if (!existingIds.has(String(scope.id))) {
+      // Add to local DB
+      DB.weekly.push({
+        week_id: wid,
+        scope_id: scope.id,
+        status: 'todo',
+        progress_pct: 0,
+        note: '',
+        updated_at: now,
+        updated_by: 'auto'
+      });
+      // Push ke Sheets
+      await gasPost({
+        action: 'setWeeklyStatus',
+        scope_id: scope.id,
+        week_id: wid,
+        status: 'todo',
+        progress_pct: 0,
+        note: '',
+        updated_by: 'auto'
+      });
+      added++;
+    }
+  }
+  if (added > 0) console.log('Auto-generated ' + added + ' missing weekly log rows');
+}
+
 function loadLocal() {
   try { const r = localStorage.getItem('simetris_db_v4'); if (r) DB = JSON.parse(r); } catch(e) {}
   renderAll();
 }
 function saveLocal() { localStorage.setItem('simetris_db_v4', JSON.stringify(DB)); }
 
-async function pushWeeklyStatus(scopeId, weekId, status, note) {
+async function pushWeeklyStatus(scopeId, weekId, status, note, progressPct) {
   // Update local cache first
   const key = weekId + '|' + scopeId;
   const existing = DB.weekly.find(r => r.week_id === weekId && r.scope_id === scopeId);
-  if (existing) { existing.status = status; existing.note = note || ''; }
-  else DB.weekly.push({ week_id: weekId, scope_id: scopeId, status, note: note || '', updated_at: new Date().toISOString() });
+  if (existing) { existing.status = status; existing.note = note || ''; existing.progress_pct = progressPct || 0; }
+  else DB.weekly.push({ week_id: weekId, scope_id: scopeId, status, note: note || '', progress_pct: progressPct || 0, updated_at: new Date().toISOString() });
   saveLocal();
   if (!GAS_URL) return;
-  gasPost({ action: 'setWeeklyStatus', scope_id: scopeId, week_id: weekId, status, note: note || '' });
+  gasPost({ action: 'setWeeklyStatus', scope_id: scopeId, week_id: weekId, status, note: note || '', progress_pct: progressPct || 0 });
 }
 
 async function pushOkrValue(okrId, current) {
@@ -594,6 +648,11 @@ function getStatus(scopeId, wid) {
   return (row && row.status) ? row.status : 'todo';
 }
 
+function getProgress(scopeId, wid) {
+  const row = DB.weekly.find(r => String(r.scope_id) === String(scopeId) && String(r.week_id) === wid);
+  return (row && row.progress_pct) ? parseFloat(row.progress_pct) : 0;
+}
+
 function renderProgress() {
   const wid = weekId(weekOffset);
   document.getElementById('week-lbl').textContent = weekLabel(weekOffset);
@@ -690,6 +749,17 @@ function renderWeeklyLog() {
     `<div class="fchip${wFilter === f ? ' on' : ''}" onclick="setWFilter('${f}')">${f === 'all' ? 'Semua' : f === 'SC-3' || f === 'SC-4' ? f : STATUS_LABEL[f]}</div>`
   ).join('');
 
+  // Populate add-scope dropdown
+  const existingIds = new Set(DB.weekly.filter(r => r.week_id === wid).map(r => String(r.scope_id)));
+  const availableScopes = DB.scopes.filter(s => !existingIds.has(String(s.id)));
+  const scopeOptHtml = availableScopes.map(s => `<option value="${s.id}">${s.scope} (${s.owner})</option>`).join('');
+  const addSel = document.getElementById('add-scope-sel');
+  if (addSel) {
+    const curVal = addSel.value;
+    addSel.innerHTML = '<option value="">— Select scope —</option>' + scopeOptHtml;
+    if (curVal && availableScopes.find(s => s.id === curVal)) addSel.value = curVal;
+  }
+
   let scopes = DB.scopes;
   if (wFilter === 'SC-3') scopes = scopes.filter(s => String(s.batch) === 'SC-3');
   else if (wFilter === 'SC-4') scopes = scopes.filter(s => String(s.batch) === 'SC-4');
@@ -699,6 +769,7 @@ function renderWeeklyLog() {
 
   document.getElementById('wlog-body').innerHTML = scopes.length ? scopes.map((s, i) => {
     const st = getStatus(s.id, wid);
+    const prog = getProgress(s.id, wid);
     const noteRow = DB.weekly.find(r => String(r.scope_id) === String(s.id) && String(r.week_id) === wid);
     const note = noteRow ? (noteRow.note || '') : '';
     const bCls = String(s.batch) === 'SC-3' ? 'b-sc3' : 'b-sc4';
@@ -707,6 +778,9 @@ function renderWeeklyLog() {
       const pst = getStatus(s.id, pw);
       return `<div class="hdot" title="${weekLabel(weekOffset - 4 + pi)}: ${STATUS_LABEL[pst]}" style="background:${STATUS_CLR[pst]};opacity:${pi === 4 ? 1 : 0.45};${pi === 4 ? 'outline:1px solid rgba(0,0,0,.15)' : ''}"></div>`;
     }).join('');
+    const progDisplay = st === 'wip' 
+      ? `<input class="prog-inp" type="number" min="0" max="100" value="${prog}" onchange="onProgChange('${s.id}','${wid}',this.value)" style="width:50px;text-align:center">%`
+      : st === 'done' ? '100%' : '—';
     return `<tr>
       <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)">${i+1}</td>
       <td class="td-scope">${s.scope || ''}</td>
@@ -718,29 +792,96 @@ function renderWeeklyLog() {
           ${opts}
         </select>
       </td>
+      <td style="text-align:center;font-weight:600;color:var(--ink)">${progDisplay}</td>
       <td><div class="hist-dots">${dots}</div></td>
       <td><input class="note-inp" type="text" value="${note}" placeholder="Catatan..." onchange="onNoteChange('${s.id}','${wid}',this.value)"></td>
+      <td style="text-align:center"><button class="btn-danger" onclick="deleteFromWeek('${s.id}','${wid}')">✕</button></td>
     </tr>`;
-  }).join('') : '<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--ink3);font-size:13px">Tidak ada scope</td></tr>';
+  }).join('') : '<tr><td colspan="10" style="padding:32px;text-align:center;color:var(--ink3);font-size:13px">Tidak ada scope</td></tr>';
 }
 
 function setWFilter(f) { wFilter = f; renderWeeklyLog(); }
 
 function onStatusChange(scopeId, wid, val, sel) {
   sel.className = 'status-sel ' + STATUS_CLS[val];
-  const noteEl = sel.closest('tr').querySelector('.note-inp');
+  const tr = sel.closest('tr');
+  const noteEl = tr.querySelector('.note-inp');
+  const progEl = tr.querySelector('.prog-inp');
   const note = noteEl ? noteEl.value : '';
-  pushWeeklyStatus(scopeId, wid, val, note);
+  const prog = progEl ? progEl.value : 0;
+  pushWeeklyStatus(scopeId, wid, val, note, prog);
   renderProgress();
+  renderWeeklyLog();
   toast(STATUS_LABEL[val], 'ok');
 }
 
 function onNoteChange(scopeId, wid, val) {
+  const tr = event.target.closest('tr');
+  const progEl = tr.querySelector('.prog-inp');
+  const st = getStatus(scopeId, wid);
+  const prog = progEl ? progEl.value : 0;
   clearTimeout(debounce['note_' + scopeId]);
   debounce['note_' + scopeId] = setTimeout(() => {
-    const st = getStatus(scopeId, wid);
-    pushWeeklyStatus(scopeId, wid, st, val);
+    pushWeeklyStatus(scopeId, wid, st, val, prog);
   }, 1000);
+}
+
+function onProgChange(scopeId, wid, val) {
+  const st = getStatus(scopeId, wid);
+  const tr = event.target.closest('tr');
+  const noteEl = tr.querySelector('.note-inp');
+  const note = noteEl ? noteEl.value : '';
+  clearTimeout(debounce['prog_' + scopeId]);
+  debounce['prog_' + scopeId] = setTimeout(() => {
+    pushWeeklyStatus(scopeId, wid, st, note, val);
+  }, 600);
+}
+
+// ── ADD SCOPE TO WEEK ──
+async function addScopeToWeek(scopeId) {
+  if (!scopeId) return;
+  const wid = weekId(weekOffset);
+  const scope = DB.scopes.find(s => s.id === scopeId);
+  if (!scope) return;
+  
+  // Add to local DB
+  DB.weekly.push({
+    week_id: wid,
+    scope_id: scopeId,
+    status: 'todo',
+    progress_pct: 0,
+    note: '',
+    updated_at: new Date().toISOString(),
+    updated_by: 'web'
+  });
+  saveLocal();
+  
+  // Push ke Sheets
+  await pushWeeklyStatus(scopeId, wid, 'todo', '', 0);
+  renderWeeklyLog();
+  toast('Added: ' + scope.scope, 'ok');
+}
+
+// ── DELETE FROM WEEK ──
+async function deleteFromWeek(scopeId, wid) {
+  const scope = DB.scopes.find(s => s.id === scopeId);
+  if (!confirm(`Hapus "${scope.scope}" dari minggu ini?`)) return;
+  
+  // Remove from local DB
+  DB.weekly = DB.weekly.filter(r => !(r.week_id === wid && r.scope_id === scopeId));
+  saveLocal();
+  
+  // Delete from Sheets
+  if (GAS_URL) {
+    await gasPost({
+      action: 'deleteWeeklyEntry',
+      week_id: wid,
+      scope_id: scopeId
+    });
+  }
+  renderWeeklyLog();
+  renderProgress();
+  toast('Deleted from week', 'ok');
 }
 
 // ══════════════════════════════════════════════════════
