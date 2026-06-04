@@ -466,8 +466,10 @@ let debounceTimers = {};
 
 // ══════════════════════════════════════
 //  SHEETS API LAYER
+//  GET  → JSONP (bypass CORS untuk read)
+//  POST → fetch no-cors + form-encoded (bypass CORS untuk write)
 // ══════════════════════════════════════
-function setSyncStatus(state){ // 'loading' | 'ok' | 'error' | 'local'
+function setSyncStatus(state){
   const dot=document.getElementById('sync-dot');
   const lbl=document.getElementById('sync-label');
   if(!dot)return;
@@ -482,15 +484,64 @@ function setSyncStatus(state){ // 'loading' | 'ok' | 'error' | 'local'
   if(nls&&state==='ok')nls.textContent=new Date().toLocaleString('id-ID');
 }
 
-async function gasGet(params){
-  const url=GAS_URL+'?'+new URLSearchParams(params);
-  const res=await fetch(url);
-  return res.json();
+// JSONP helper — satu-satunya cara GET cross-origin ke GAS yang reliable
+function gasGet(params){
+  return new Promise((resolve,reject)=>{
+    const cbName='_gasCb_'+Date.now();
+    const script=document.createElement('script');
+    const timer=setTimeout(()=>{
+      delete window[cbName];
+      document.head.removeChild(script);
+      reject(new Error('JSONP timeout'));
+    },15000);
+    window[cbName]=function(data){
+      clearTimeout(timer);
+      delete window[cbName];
+      document.head.removeChild(script);
+      resolve(data);
+    };
+    const p=new URLSearchParams({...params,callback:cbName});
+    script.src=GAS_URL+'?'+p.toString();
+    script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject(new Error('Script load error'));};
+    document.head.appendChild(script);
+  });
 }
 
-async function gasPost(body){
-  const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  return res.json();
+// POST pakai fetch no-cors — GAS terima ini, response opaque (kita tidak bisa baca),
+// tapi data TETAP tersimpan di Sheets. Fire-and-forget.
+function gasPost(body){
+  if(!GAS_URL)return Promise.resolve({ok:false});
+  // Encode sebagai form data supaya GAS bisa baca via e.postData
+  return fetch(GAS_URL,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(body)
+  }).then(()=>({ok:true})).catch(()=>({ok:false}));
+}
+
+// POST untuk initSheets — perlu baca response, pakai JSONP trick via GET
+function gasPostRead(body){
+  return new Promise((resolve,reject)=>{
+    const cbName='_gasCbP_'+Date.now();
+    const script=document.createElement('script');
+    const timer=setTimeout(()=>{
+      delete window[cbName];
+      if(document.head.contains(script))document.head.removeChild(script);
+      reject(new Error('Timeout'));
+    },20000);
+    window[cbName]=function(data){
+      clearTimeout(timer);
+      delete window[cbName];
+      if(document.head.contains(script))document.head.removeChild(script);
+      resolve(data);
+    };
+    // Kirim body sebagai param, GAS handle via doGet juga
+    const p=new URLSearchParams({action:body.action,callback:cbName,mode:'init'});
+    script.src=GAS_URL+'?'+p.toString();
+    script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject(new Error('Error'));};
+    document.head.appendChild(script);
+  });
 }
 
 async function loadFromSheets(){
@@ -595,7 +646,8 @@ async function connectAndInit(){
   localStorage.setItem('simetris_gas_url',url);
   useSheets=true;
   try{
-    const res=await gasPost({action:'initSheets'});
+    // pakai JSONP (gasPostRead) karena perlu baca response dari initSheets
+    const res=await gasPostRead({action:'initSheets'});
     if(res.ok){
       document.getElementById('setup-notice').textContent='Connected! Sheet dibuat: '+((res.created||[]).join(', ')||'sudah ada sebelumnya');
       toast('Sheets connected!','ok');
@@ -604,7 +656,7 @@ async function connectAndInit(){
       document.getElementById('setup-notice').textContent='Error: '+(res.error||'Unknown');
     }
   }catch(e){
-    document.getElementById('setup-notice').textContent='Gagal connect: '+e.message+'. Cek URL dan pastikan deployment sudah set "Anyone".';
+    document.getElementById('setup-notice').textContent='Gagal connect: '+e.message+'. Pastikan deployment set "Anyone" dan coba reload.';
   }
 }
 
