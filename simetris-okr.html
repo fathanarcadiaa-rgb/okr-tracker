@@ -3,940 +3,950 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIMETRIS — OKR Tracker v3</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>SIMETRIS — OKR Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* ── TOKENS ── */
 :root{
-  --red:#D0001B;--red-dark:#9B0014;--red-muted:rgba(208,0,27,.12);--red-glow:rgba(208,0,27,.3);
-  --bg:#0F0A0A;--bg2:#180D0D;--surface:#1E1010;--surface2:#271515;
-  --border:rgba(208,0,27,.2);--border2:rgba(255,255,255,.06);
-  --text:#F0EAEA;--muted:#8A7070;
-  --ok:#22C55E;--warn:#F59E0B;--danger:#EF4444;--info:#38BDF8;--purple:#A78BFA;
+  --red:#D0001B; --red2:#B5001A; --red-bg:rgba(208,0,27,.06); --red-border:rgba(208,0,27,.2);
+  --ink:#111111; --ink2:#444444; --ink3:#888888;
+  --bg:#FFFFFF; --bg2:#F7F7F7; --bg3:#F0EDED;
+  --line:#E5E0E0; --line2:rgba(208,0,27,.15);
+  --ok:#15803D; --ok-bg:rgba(21,128,61,.08);
+  --warn:#B45309; --warn-bg:rgba(180,83,9,.08);
+  --danger:#DC2626; --danger-bg:rgba(220,38,38,.08);
+  --info:#1D4ED8; --info-bg:rgba(29,78,216,.08);
+  --purple:#6D28D9; --purple-bg:rgba(109,40,217,.08);
+  --radius:8px; --radius-lg:12px;
+  --shadow:0 1px 4px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04);
+  --shadow-md:0 2px 8px rgba(0,0,0,.1),0 8px 24px rgba(0,0,0,.06);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;min-height:100vh;}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--ink);font-family:'Sora',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;}
+button{font-family:'Sora',sans-serif;}
+input,textarea,select{font-family:'Sora',sans-serif;}
 
 /* ── SETUP OVERLAY ── */
-.setup-overlay{position:fixed;inset:0;background:rgba(15,10,10,.97);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-.setup-box{background:var(--surface);border:2px solid var(--red);border-radius:16px;padding:40px 44px;max-width:560px;width:90%;}
-.setup-box h2{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:white;margin-bottom:4px;}
-.setup-box h2 span{color:var(--red);}
-.setup-subtitle{font-size:13px;color:var(--muted);margin-bottom:28px;}
-.setup-steps{display:flex;flex-direction:column;gap:14px;margin-bottom:28px;}
-.setup-step{display:flex;gap:14px;align-items:flex-start;}
-.step-num{width:28px;height:28px;border-radius:50%;background:var(--red);color:white;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-.step-text{font-size:13px;color:var(--text);line-height:1.6;}
-.step-text code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border2);padding:1px 6px;border-radius:3px;color:var(--warn);}
-.step-text a{color:var(--info);text-decoration:none;}
-.step-text a:hover{text-decoration:underline;}
-.url-input-wrap{position:relative;margin-bottom:20px;}
-.url-input-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
-.url-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 14px;outline:none;transition:border-color .18s;}
-.url-input:focus{border-color:var(--red);}
-.url-input::placeholder{color:var(--muted);}
-.url-hint{font-size:11px;color:var(--muted);margin-top:5px;}
-.setup-actions{display:flex;gap:10px;}
-.setup-saved-notice{font-size:11px;color:var(--muted);margin-top:12px;text-align:center;}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.96);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.setup-card{background:#fff;border:1.5px solid var(--red-border);border-radius:var(--radius-lg);padding:36px 40px;max-width:540px;width:100%;box-shadow:var(--shadow-md);}
+.setup-logo{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.setup-logo-mark{width:32px;height:32px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;flex-shrink:0;}
+.setup-logo h2{font-size:20px;font-weight:700;color:var(--ink);}
+.setup-logo h2 span{color:var(--red);}
+.setup-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+.step{display:flex;gap:12px;align-items:flex-start;}
+.step-n{width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-t{font-size:13px;color:var(--ink2);line-height:1.6;}
+.step-t code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg3);border:1px solid var(--line);padding:1px 5px;border-radius:4px;color:var(--red);}
+.step-t a{color:var(--info);text-decoration:none;}
+.step-t a:hover{text-decoration:underline;}
+.inp-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);margin-bottom:5px;}
+.url-inp{width:100%;border:1.5px solid var(--line);border-radius:var(--radius);color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 13px;outline:none;transition:border-color .15s;background:var(--bg2);}
+.url-inp:focus{border-color:var(--red);}
+.url-inp::placeholder{color:var(--ink3);}
+.url-hint{font-size:11px;color:var(--ink3);margin-top:4px;margin-bottom:20px;}
+.setup-btns{display:flex;gap:10px;}
+.setup-note{font-size:11px;color:var(--ink3);margin-top:12px;text-align:center;min-height:16px;}
+
+/* ── BUTTONS ── */
+.btn{font-size:12px;font-weight:600;padding:8px 18px;border-radius:var(--radius);border:none;cursor:pointer;transition:all .15s;letter-spacing:.2px;display:inline-flex;align-items:center;gap:6px;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{background:var(--red2);box-shadow:0 2px 8px rgba(208,0,27,.3);}
+.btn-outline{background:transparent;color:var(--ink2);border:1.5px solid var(--line);}
+.btn-outline:hover{border-color:var(--red);color:var(--red);}
+.btn-ghost{background:transparent;color:var(--ink3);border:none;padding:6px 10px;}
+.btn-ghost:hover{color:var(--red);}
+.btn-sm{font-size:11px;padding:5px 12px;}
 
 /* ── HEADER ── */
-.header{background:linear-gradient(180deg,#1A0808 0%,#0F0A0A 100%);border-bottom:2px solid var(--red);padding:20px 36px 0;position:sticky;top:0;z-index:200;box-shadow:0 4px 32px var(--red-glow);}
-.header-row1{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;}
-.brand{display:flex;align-items:center;gap:14px;}
-.brand-logo{width:36px;height:36px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:white;box-shadow:0 0 16px var(--red-glow);flex-shrink:0;}
-.brand h1{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:1px;color:white;line-height:1;}
-.brand h1 span{color:var(--red);}
-.brand-sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
-.header-pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.pill{font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--muted);white-space:nowrap;}
-.pill.red{border-color:var(--red);color:var(--red);}
-.pill.ok{border-color:var(--ok);color:var(--ok);}
-.pill.sync{border-color:var(--info);color:var(--info);display:flex;gap:5px;align-items:center;}
-.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--info);animation:blink 1.5s ease-in-out infinite;}
-.sync-dot.ok-dot{background:var(--ok);animation:none;}
-.sync-dot.err-dot{background:var(--danger);animation:none;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
-.header-actions{display:flex;gap:8px;align-items:center;}
-.btn{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;padding:7px 15px;border-radius:6px;border:none;cursor:pointer;transition:all .18s;letter-spacing:.3px;}
-.btn-red{background:var(--red);color:white;}
-.btn-red:hover{background:#B5001A;box-shadow:0 0 12px var(--red-glow);}
-.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border2);}
-.btn-ghost:hover{border-color:var(--red);color:var(--red);}
-.btn-sm{font-size:10px;padding:5px 10px;}
-.nav-tabs{display:flex;gap:0;margin-top:4px;}
-.tab-btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:9px 22px 10px;background:transparent;border:none;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .18s;}
-.tab-btn:hover{color:var(--text);}
-.tab-btn.active{color:var(--red);border-bottom-color:var(--red);}
+.header{background:#fff;border-bottom:2px solid var(--red);padding:0 36px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(208,0,27,.08);}
+.header-inner{display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;flex-wrap:wrap;gap:12px;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-mark{width:34px;height:34px;background:var(--red);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;flex-shrink:0;}
+.brand-text{line-height:1.2;}
+.brand-name{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.3px;}
+.brand-name span{color:var(--red);}
+.brand-sub{font-size:10px;color:var(--ink3);font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.header-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--ink3);background:var(--bg2);white-space:nowrap;}
+.chip.red{border-color:var(--red-border);color:var(--red);background:var(--red-bg);}
+.chip.ok{border-color:rgba(21,128,61,.3);color:var(--ok);background:var(--ok-bg);}
+.chip.sync{display:flex;align-items:center;gap:5px;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--ink3);}
+.sync-dot.syncing{background:var(--info);animation:pulse-dot 1s infinite;}
+.sync-dot.synced{background:var(--ok);}
+.sync-dot.err{background:var(--danger);}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.3;}}
+.header-actions{display:flex;gap:8px;align-items:center;padding-bottom:2px;}
+.nav-tabs{display:flex;margin-top:4px;gap:0;border-bottom:none;}
+.nav-tab{font-family:'Sora',sans-serif;font-size:12px;font-weight:600;padding:10px 20px 11px;background:transparent;border:none;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;letter-spacing:.2px;}
+.nav-tab:hover{color:var(--ink);}
+.nav-tab.active{color:var(--red);border-bottom-color:var(--red);}
 
 /* ── MAIN ── */
-.main{padding:28px 36px;max-width:1440px;}
-.tab-panel{display:none;}
-.tab-panel.active{display:block;}
+.main{padding:28px 36px;max-width:1400px;margin:0 auto;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
 
-/* ── LOADING SKELETON ── */
-.skeleton{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;height:40px;margin-bottom:10px;}
-@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+/* ── SECTION HEADER ── */
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.sec-title{font-size:20px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:10px;}
+.sec-title .badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid;}
+.badge-sc3{color:var(--red);border-color:var(--red);background:var(--red-bg);}
+.badge-sc4{color:var(--purple);border-color:var(--purple);background:var(--purple-bg);}
 
-/* ── TIMELINE ── */
-.tl-bar{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px;}
-.tl-cell{padding:14px 18px;border-right:1px solid var(--border);}
+/* ── TIMELINE BAR ── */
+.tl-strip{display:grid;grid-template-columns:repeat(4,1fr);border:1.5px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:24px;background:#fff;box-shadow:var(--shadow);}
+.tl-cell{padding:14px 18px;border-right:1px solid var(--line);}
 .tl-cell:last-child{border-right:none;}
-.tl-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-.tl-val{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;line-height:1;margin-bottom:2px;}
-.tl-sub{font-size:11px;color:var(--muted);}
-.tl-sub b{color:var(--text);}
-.tl-val.red{color:var(--red);}.tl-val.warn{color:var(--warn);}.tl-val.info{color:var(--info);}.tl-val.white{color:white;}
+.tl-label{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);margin-bottom:5px;}
+.tl-val{font-size:19px;font-weight:800;line-height:1;margin-bottom:3px;}
+.tl-val.red{color:var(--red);}.tl-val.warn{color:var(--warn);}.tl-val.ok{color:var(--ok);}.tl-val.info{color:var(--info);}
+.tl-sub{font-size:11px;color:var(--ink3);}
+.tl-sub b{color:var(--ink);}
 
-/* ── STATS ── */
-.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px;}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;transition:border-color .2s;}
-.stat-card:hover{border-color:rgba(208,0,27,.4);}
-.stat-label{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
-.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;line-height:1;}
-.stat-val.red{color:var(--red);}.stat-val.ok{color:var(--ok);}.stat-val.warn{color:var(--warn);}
-.stat-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+/* ── PROGRESS WEEKLY ── */
+.progress-section{margin-bottom:32px;}
+.week-nav-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.week-nav{display:flex;align-items:center;gap:10px;}
+.week-lbl{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red);min-width:200px;text-align:center;font-weight:600;}
+.progress-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.owner-block{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);}
+.owner-hdr{padding:14px 18px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.owner-name{font-size:14px;font-weight:700;color:var(--ink);}
+.owner-pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);}
+.batch-section{padding:12px 18px;}
+.batch-label{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);margin-bottom:10px;display:flex;justify-content:space-between;}
+.status-summary{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.status-pill{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;}
+.sp-done{background:var(--ok-bg);color:var(--ok);}
+.sp-wip{background:var(--warn-bg);color:var(--warn);}
+.sp-blocked{background:var(--danger-bg);color:var(--danger);}
+.sp-todo{background:var(--bg3);color:var(--ink3);}
+.sp-plan{background:var(--info-bg);color:var(--info);}
+.sp-review{background:var(--purple-bg);color:var(--purple);}
+.sp-defer{background:var(--bg3);color:var(--ink3);}
+.progress-bar-wrap{margin-bottom:8px;}
+.progress-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;display:flex;}
+.pb-done{background:var(--ok);}
+.pb-wip{background:var(--warn);}
+.pb-blocked{background:var(--danger);}
 
-/* ── HISTORY ── */
-.history-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:24px;}
-.history-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:white;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
-.history-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
-.hcard{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;}
-.hcard-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-.sparkline{height:36px;display:flex;align-items:flex-end;gap:3px;}
-.spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:2px;cursor:pointer;position:relative;}
-.spark-bar:hover::after{content:attr(data-tip);position:absolute;bottom:105%;left:50%;transform:translateX(-50%);background:var(--surface2);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 6px;border-radius:3px;white-space:nowrap;z-index:20;pointer-events:none;}
-.hcard-current{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;margin-top:6px;}
+/* ── SCOPE LIST per minggu ── */
+.scope-list{margin-top:8px;}
+.scope-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px;}
+.scope-row:last-child{border-bottom:none;}
+.scope-name{color:var(--ink);font-weight:500;}
+.scope-item{color:var(--ink3);font-size:11px;}
 
-/* ── OKR CARDS ── */
-.okr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:28px;}
-.okr-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;transition:border-color .2s;}
-.okr-card:hover{border-color:rgba(208,0,27,.4);}
-.okr-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;background:var(--red-muted);color:var(--red);border:1px solid rgba(208,0,27,.3);margin-bottom:8px;}
-.okr-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;line-height:1.3;margin-bottom:14px;color:white;}
-.kr-list{display:flex;flex-direction:column;gap:12px;}
-.kr-name{font-size:12px;color:var(--muted);margin-bottom:3px;}
-.kr-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.kr-prog{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;}
-.bar{height:3px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:6px;}
-.bar-fill{height:100%;border-radius:2px;transition:width .5s ease;}
-.bar-fill.red{background:var(--red);}.bar-fill.ok{background:var(--ok);}.bar-fill.warn{background:var(--warn);}
-.kr-row{display:flex;gap:6px;align-items:center;}
-.kr-inp{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:4px 8px;outline:none;transition:border-color .18s;}
-.kr-inp:focus{border-color:var(--red);}
-.kr-unit{font-size:11px;color:var(--muted);white-space:nowrap;}
-.kr-saving{font-size:10px;color:var(--info);margin-left:4px;display:none;}
+/* ── STATUS SELECT ── */
+.status-sel{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;border:1px solid;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;min-width:95px;text-align:center;transition:all .12s;}
+.ss-todo{background:var(--bg3);color:var(--ink3);border-color:var(--line);}
+.ss-plan{background:var(--info-bg);color:var(--info);border-color:rgba(29,78,216,.3);}
+.ss-wip{background:var(--warn-bg);color:var(--warn);border-color:rgba(180,83,9,.3);}
+.ss-review{background:var(--purple-bg);color:var(--purple);border-color:rgba(109,40,217,.3);}
+.ss-done{background:var(--ok-bg);color:var(--ok);border-color:rgba(21,128,61,.3);}
+.ss-blocked{background:var(--danger-bg);color:var(--danger);border-color:rgba(220,38,38,.3);}
+.ss-defer{background:var(--bg3);color:var(--ink3);border-color:var(--line);}
 
-/* ── WEEKLY ── */
-.wlog-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
-.wlog-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:white;}
-.week-nav{display:flex;gap:8px;align-items:center;}
-.week-lbl{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red);min-width:200px;text-align:center;}
-.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-.fchip{font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 12px;border-radius:20px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);cursor:pointer;transition:all .15s;}
-.fchip:hover,.fchip.on{background:var(--red-muted);border-color:var(--red);color:var(--red);}
-.s-todo{background:var(--surface2);color:var(--muted);}
-.s-plan{background:rgba(56,189,248,.1);color:var(--info);}
-.s-wip{background:rgba(245,158,11,.12);color:var(--warn);}
-.s-review{background:rgba(167,139,250,.12);color:var(--purple);}
-.s-done{background:rgba(34,197,94,.12);color:var(--ok);}
-.s-blocked{background:rgba(239,68,68,.12);color:var(--danger);}
-.s-defer{background:rgba(100,80,80,.15);color:var(--muted);}
-.wlog-table{width:100%;border-collapse:collapse;font-size:12px;}
-.wlog-table thead th{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:8px 10px;background:var(--surface2);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
-.wlog-table tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .12s;}
-.wlog-table tbody tr:hover{background:var(--surface2);}
-.wlog-table td{padding:8px 10px;vertical-align:middle;}
-.td-scope{font-weight:500;color:var(--text);max-width:200px;}
-.td-item{color:var(--muted);font-size:11px;white-space:nowrap;}
-.b-sc3{color:var(--red)!important;border-color:var(--red)!important;}
-.b-sc4{color:var(--purple)!important;border-color:var(--purple)!important;}
-.status-sel{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;padding:4px 8px;border-radius:4px;border:none;cursor:pointer;min-width:100px;text-align:center;outline:none;transition:all .15s;}
-.td-note textarea{width:160px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;padding:4px 7px;resize:none;outline:none;transition:border-color .15s;}
-.td-note textarea:focus{border-color:var(--red);}
+/* ── HISTORY DOTS ── */
 .hist-dots{display:flex;gap:3px;align-items:center;}
-.hdot{width:8px;height:8px;border-radius:2px;cursor:help;}
-.saving-indicator{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--info);margin-left:4px;}
+.hdot{width:7px;height:7px;border-radius:2px;flex-shrink:0;}
 
-/* ── RICE ── */
-.rice-hdr-box{background:linear-gradient(135deg,var(--surface),var(--bg2));border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:12px;line-height:1.7;color:var(--muted);}
-.rice-sec-hdr{display:flex;gap:10px;align-items:center;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:24px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-.badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid;}
-.badge-sc3{color:var(--red);border-color:var(--red);background:var(--red-muted);}
-.badge-sc4{color:var(--purple);border-color:var(--purple);background:rgba(167,139,250,.08);}
-.tbl-wrap{overflow-x:auto;margin-bottom:4px;}
-.rice-tbl{width:100%;border-collapse:collapse;font-size:12px;}
-.rice-tbl thead th{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:9px 10px;background:var(--surface2);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
-.rice-tbl tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .12s;}
-.rice-tbl tbody tr:hover{background:var(--surface2);}
+/* ── NOTE INPUT ── */
+.note-inp{font-size:11px;color:var(--ink2);background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:3px 7px;outline:none;width:140px;transition:border-color .15s;font-family:'Sora',sans-serif;}
+.note-inp:focus{border-color:var(--red);}
+
+/* ── FILTER CHIPS ── */
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.fchip{font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 12px;border-radius:20px;background:var(--bg2);border:1px solid var(--line);color:var(--ink3);cursor:pointer;transition:all .12s;font-weight:500;}
+.fchip:hover,.fchip.on{background:var(--red-bg);border-color:var(--red-border);color:var(--red);}
+
+/* ── WEEKLY LOG TABLE ── */
+.tbl-wrap{overflow-x:auto;border:1.5px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow);}
+table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;}
+thead th{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);padding:10px 12px;background:var(--bg2);border-bottom:2px solid var(--red);text-align:left;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--line);transition:background .1s;}
+tbody tr:hover{background:#FFF5F5;}
+tbody tr:last-child{border-bottom:none;}
+td{padding:9px 12px;vertical-align:middle;}
+.td-scope{font-weight:600;color:var(--ink);min-width:180px;}
+.td-item{color:var(--ink3);font-size:11px;white-space:nowrap;}
+.td-owner{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);}
+.td-batch span{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid;}
+.b-sc3{color:var(--red)!important;border-color:var(--red)!important;background:var(--red-bg)!important;}
+.b-sc4{color:var(--purple)!important;border-color:var(--purple)!important;background:var(--purple-bg)!important;}
+
+/* ── OKR RELEASE ── */
+.okr-section{margin-bottom:28px;}
+.objective-card{border:1.5px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);background:#fff;}
+.obj-hdr{padding:14px 20px;background:var(--bg2);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.obj-title{font-size:14px;font-weight:700;color:var(--ink);}
+.obj-owner{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);}
+.kr-rows{padding:4px 0;}
+.kr-row{display:grid;grid-template-columns:1fr auto auto auto;gap:16px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);}
+.kr-row:last-child{border-bottom:none;}
+.kr-name{font-size:13px;color:var(--ink);font-weight:500;}
+.kr-bar-wrap{display:flex;align-items:center;gap:10px;min-width:160px;}
+.kr-bar{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.kr-bar-fill{height:100%;border-radius:2px;transition:width .4s;}
+.kr-bar-fill.ok{background:var(--ok);}
+.kr-bar-fill.warn{background:var(--warn);}
+.kr-bar-fill.red{background:var(--red);}
+.kr-pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);min-width:36px;text-align:right;}
+.kr-inp-wrap{display:flex;align-items:center;gap:6px;}
+.kr-inp{width:80px;background:var(--bg2);border:1.5px solid var(--line);border-radius:var(--radius);color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12px;padding:5px 8px;outline:none;transition:border-color .15s;text-align:right;}
+.kr-inp:focus{border-color:var(--red);}
+.kr-unit{font-size:11px;color:var(--ink3);white-space:nowrap;}
+.kr-target{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);white-space:nowrap;}
+
+/* ── RICE TABLE ── */
+.rice-guide{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--ink2);line-height:1.7;}
+.rice-guide b{color:var(--ink);}
 .rice-tbl td{padding:8px 10px;vertical-align:middle;}
-.td-scope-r{font-weight:500;color:var(--text);min-width:200px;}
-.td-item-r{color:var(--muted);font-size:11px;min-width:110px;}
-.rice-inp{width:56px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:4px 6px;text-align:center;outline:none;transition:border-color .15s;}
+.rice-tbl .td-scope-r{font-weight:600;color:var(--ink);min-width:180px;}
+.rice-tbl .td-item-r{color:var(--ink3);font-size:11px;min-width:110px;}
+.rice-inp{width:58px;background:var(--bg2);border:1.5px solid var(--line);border-radius:5px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12px;padding:4px 6px;text-align:center;outline:none;transition:border-color .15s;}
 .rice-inp:focus{border-color:var(--red);}
-.td-nilai{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-align:center;}
-.td-rice{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;text-align:center;}
-.rank{display:inline-block;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;}
-.r-high{background:rgba(34,197,94,.12);color:var(--ok);}
-.r-mid{background:rgba(245,158,11,.1);color:var(--warn);}
-.r-low{background:rgba(239,68,68,.1);color:var(--danger);}
-.r-zero{background:var(--surface2);color:var(--muted);}
-.td-saran textarea{width:200px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;padding:5px 7px;resize:vertical;outline:none;transition:border-color .15s;min-height:36px;line-height:1.4;}
-.td-saran textarea:focus{border-color:var(--red);}
+.td-nilai{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;text-align:center;color:var(--ink);}
+.td-rice-final{text-align:center;}
+.rank{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;}
+.r-high{background:var(--ok-bg);color:var(--ok);}
+.r-mid{background:var(--warn-bg);color:var(--warn);}
+.r-low{background:var(--danger-bg);color:var(--danger);}
+.r-zero{background:var(--bg3);color:var(--ink3);}
+.saran-ta{width:200px;background:var(--bg2);border:1.5px solid var(--line);border-radius:5px;color:var(--ink2);font-family:'Sora',sans-serif;font-size:11px;padding:5px 7px;resize:vertical;outline:none;transition:border-color .15s;min-height:34px;line-height:1.4;}
+.saran-ta:focus{border-color:var(--red);}
 
-/* ── NOTES ── */
-.notes-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
-.notes-lbl{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
-.notes-ta{width:100%;min-height:120px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:12px 14px;resize:vertical;outline:none;transition:border-color .15s;line-height:1.6;}
-.notes-ta:focus{border-color:var(--red);}
-.sync-status-bar{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px;margin-bottom:16px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
-.dot-ok{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;}
-.dot-err{width:8px;height:8px;border-radius:50%;background:var(--danger);display:inline-block;}
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 24px;color:var(--ink3);}
+.empty-icon{font-size:32px;margin-bottom:10px;}
+.empty-text{font-size:14px;margin-bottom:4px;font-weight:600;color:var(--ink2);}
+.empty-sub{font-size:12px;}
+
+/* ── LOADING ── */
+.loading{display:flex;align-items:center;justify-content:center;padding:48px;gap:10px;color:var(--ink3);font-size:13px;}
+.spin{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
 /* ── TOAST ── */
-.toast{position:fixed;bottom:20px;right:20px;background:var(--red);color:white;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;padding:10px 18px;border-radius:6px;z-index:9999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;box-shadow:0 4px 20px var(--red-glow);}
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:var(--radius);font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(6px);transition:all .22s;pointer-events:none;font-family:'JetBrains Mono',monospace;}
 .toast.show{opacity:1;transform:translateY(0);}
-.toast.ok-toast{background:var(--ok);color:#0a0a0a;}
+.toast.t-ok{background:var(--ok);color:#fff;}
+.toast.t-err{background:var(--danger);color:#fff;}
+.toast.t-info{background:var(--ink);color:#fff;}
 
+/* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:var(--bg);}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:rgba(208,0,27,.25);border-radius:3px;}
 
-@media(max-width:768px){
-  .header{padding:14px 16px 0;}.main{padding:16px;}.notes-grid{grid-template-columns:1fr;}
-  .tl-bar{grid-template-columns:1fr 1fr;}.header-actions .btn-ghost{display:none;}
+@media(max-width:900px){
+  .progress-grid{grid-template-columns:1fr;}
+  .header{padding:0 16px;}
+  .main{padding:16px;}
+  .tl-strip{grid-template-columns:1fr 1fr;}
+  .kr-row{grid-template-columns:1fr auto;}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ SETUP OVERLAY ═══ -->
-<div class="setup-overlay" id="setup-overlay">
-  <div class="setup-box">
-    <h2>Setup <span>SIMETRIS</span> Tracker</h2>
-    <p class="setup-subtitle">Hubungkan ke Google Sheets supaya semua device sync otomatis.</p>
+<!-- SETUP OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <div class="setup-logo-mark">SM</div>
+      <h2>Setup <span>SIMETRIS</span> Tracker</h2>
+    </div>
     <div class="setup-steps">
-      <div class="setup-step">
-        <div class="step-num">1</div>
-        <div class="step-text">Buka <a href="https://script.google.com" target="_blank">script.google.com</a> → <strong>New Project</strong> → paste isi file <code>Code.gs</code> → Save.</div>
-      </div>
-      <div class="setup-step">
-        <div class="step-num">2</div>
-        <div class="step-text">Klik <strong>Deploy</strong> → <strong>New Deployment</strong> → Type: <code>Web App</code> → Execute as: <code>Me</code> → Who has access: <code>Anyone</code> → <strong>Deploy</strong>.</div>
-      </div>
-      <div class="setup-step">
-        <div class="step-num">3</div>
-        <div class="step-text">Copy URL deployment yang muncul (format: <code>https://script.google.com/macros/s/AKfy.../exec</code>) → paste di bawah.</div>
-      </div>
-      <div class="setup-step">
-        <div class="step-num">4</div>
-        <div class="step-text">Klik <strong>Connect &amp; Init</strong>. Tracker akan otomatis bikin sheet-sheet yang dibutuhkan.</div>
-      </div>
+      <div class="step"><div class="step-n">1</div><div class="step-t">Buka <a href="https://sheets.google.com" target="_blank">Google Sheets</a> baru → <strong>Extensions → Apps Script</strong> → paste isi <code>Code_v4.gs</code> → Save.</div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-t">Di Apps Script: <strong>Run → runSetup</strong> (authorize kalau diminta). Sheet otomatis dibuat + di-seed.</div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-t"><strong>Deploy → New Deployment → Web App</strong>. Execute as: <code>Me</code> · Who has access: <code>Anyone</code>.</div></div>
+      <div class="step"><div class="step-n">4</div><div class="step-t">Copy URL <code>/exec</code> → paste di bawah → <strong>Connect</strong>.</div></div>
     </div>
-    <div class="url-input-wrap">
-      <div class="url-input-label">Apps Script Deployment URL</div>
-      <input class="url-input" id="gas-url-input" type="text" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
-      <div class="url-hint">URL ini disimpan di localStorage browser lo. Semua user lain yang mau connect juga perlu paste URL yang sama.</div>
+    <div class="inp-lbl">Apps Script Deployment URL</div>
+    <input class="url-inp" id="gas-inp" type="text" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="url-hint">Disimpan di localStorage. Semua user yang mau sync ke Sheets yang sama perlu paste URL ini.</div>
+    <div class="setup-btns">
+      <button class="btn btn-red" onclick="doConnect()">Connect &amp; Init</button>
+      <button class="btn btn-outline" onclick="skipSetup()">Pakai localStorage saja</button>
     </div>
-    <div class="setup-actions">
-      <button class="btn btn-red" onclick="connectAndInit()">Connect &amp; Init</button>
-      <button class="btn btn-ghost" onclick="skipSetup()">Pakai localStorage saja</button>
-    </div>
-    <div class="setup-saved-notice" id="setup-notice"></div>
+    <div class="setup-note" id="setup-note"></div>
   </div>
 </div>
 
-<!-- ═══ HEADER ═══ -->
+<!-- HEADER -->
 <header class="header">
-  <div class="header-row1">
+  <div class="header-inner">
     <div class="brand">
-      <div class="brand-logo">SM</div>
-      <div>
-        <h1>SIMETRIS <span>OKR</span> TRACKER</h1>
-        <div class="brand-sub">Sinarmas Multifinance &middot; SC-3 &amp; SC-4 &middot; v3.0</div>
+      <div class="brand-mark">SM</div>
+      <div class="brand-text">
+        <div class="brand-name">SIMETRIS <span>OKR</span></div>
+        <div class="brand-sub">Sinarmas Multifinance · Agent Platform Tracker</div>
       </div>
     </div>
-    <div class="header-pills">
-      <span class="pill">SC-3: 23 Jul 2026</span>
-      <span class="pill">SC-4: 27 Agt 2026</span>
-      <span class="pill red">App: 30 Jun 2026</span>
-      <span class="pill ok" id="today-pill"></span>
-      <span class="pill sync" id="sync-pill"><span class="sync-dot" id="sync-dot"></span><span id="sync-label">Connecting...</span></span>
+    <div class="header-meta">
+      <span class="chip">SC-3: 23 Jul 2026</span>
+      <span class="chip">SC-4: 27 Agt 2026</span>
+      <span class="chip red">App Release: 30 Jun 2026</span>
+      <span class="chip ok" id="today-chip"></span>
+      <span class="chip sync" id="sync-chip"><span class="sync-dot syncing" id="sync-dot"></span><span id="sync-lbl">Connecting...</span></span>
     </div>
     <div class="header-actions">
-      <button class="btn btn-ghost btn-sm" onclick="forceRefresh()" title="Ambil data terbaru dari Sheets">&#8635; Refresh</button>
-      <button class="btn btn-ghost btn-sm" onclick="showSetup()">&#9881; Setup</button>
+      <button class="btn btn-ghost btn-sm" onclick="doRefresh()">&#8635; Refresh</button>
+      <button class="btn btn-outline btn-sm" onclick="showSetup()">&#9881; Setup</button>
     </div>
   </div>
   <nav class="nav-tabs">
-    <button class="tab-btn active" data-tab="okr">OKR Progress</button>
-    <button class="tab-btn" data-tab="weekly">Weekly Log</button>
-    <button class="tab-btn" data-tab="rice">RICE Modelling</button>
-    <button class="tab-btn" data-tab="notes">Notes &amp; Blockers</button>
+    <button class="nav-tab active" data-tab="progress">Progress Mingguan</button>
+    <button class="nav-tab" data-tab="weekly">Weekly Log</button>
+    <button class="nav-tab" data-tab="okr">OKR Release</button>
+    <button class="nav-tab" data-tab="rice">RICE Modelling</button>
   </nav>
 </header>
 
 <div class="main">
 
-<!-- OKR TAB -->
-<div class="tab-panel active" id="tab-okr">
-  <div class="tl-bar" id="tl-bar"></div>
-  <div class="stats-row" id="stats-row"></div>
-  <div class="history-section">
-    <div class="history-title">&#128200; Progress Mingguan <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);font-weight:400">tiap update status otomatis ke-record</span></div>
-    <div class="history-grid" id="history-grid"></div>
-  </div>
-  <div class="okr-grid" id="okr-grid"></div>
-</div>
+<!-- ═══ TAB: PROGRESS MINGGUAN ═══ -->
+<div class="tab-pane active" id="tab-progress">
+  <div class="tl-strip" id="tl-strip"></div>
 
-<!-- WEEKLY TAB -->
-<div class="tab-panel" id="tab-weekly">
-  <div class="wlog-header">
-    <div class="wlog-title">Weekly Feature Log</div>
-    <div class="week-nav">
-      <button class="btn btn-ghost btn-sm" onclick="shiftWeek(-1)">&#8592; Prev</button>
-      <div class="week-lbl" id="week-lbl">&#8212;</div>
-      <button class="btn btn-ghost btn-sm" onclick="shiftWeek(1)">Next &#8594;</button>
+  <div class="progress-section">
+    <div class="week-nav-row">
+      <div style="font-size:16px;font-weight:700;color:var(--ink)">Progress Mingguan</div>
+      <div class="week-nav">
+        <button class="btn btn-outline btn-sm" onclick="shiftWeek(-1)">&#8592; Prev</button>
+        <div class="week-lbl" id="week-lbl">—</div>
+        <button class="btn btn-outline btn-sm" onclick="shiftWeek(1)">Next &#8594;</button>
+      </div>
+    </div>
+
+    <div class="progress-grid" id="progress-grid">
+      <div class="loading"><div class="spin"></div>Loading data...</div>
+    </div>
+
+    <!-- Scope list per status -->
+    <div style="margin-top:24px;">
+      <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:14px;">Detail Scope — Semua Status</div>
+      <div class="filter-row" id="prog-filter-row"></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Scope</th><th>Item</th><th>Batch</th><th>Owner</th><th>Status Minggu Ini</th><th>History 5W</th></tr></thead>
+          <tbody id="prog-scope-body"></tbody>
+        </table>
+      </div>
     </div>
   </div>
-  <div class="filter-row" id="filter-row"></div>
-  <div style="overflow-x:auto">
-    <table class="wlog-table">
+</div>
+
+<!-- ═══ TAB: WEEKLY LOG ═══ -->
+<div class="tab-pane" id="tab-weekly">
+  <div class="sec-hdr">
+    <div class="sec-title">Weekly Log</div>
+    <div class="week-nav">
+      <button class="btn btn-outline btn-sm" onclick="shiftWeek(-1)">&#8592; Prev</button>
+      <div class="week-lbl" id="week-lbl2">—</div>
+      <button class="btn btn-outline btn-sm" onclick="shiftWeek(1)">Next &#8594;</button>
+    </div>
+  </div>
+  <div class="filter-row" id="wlog-filter-row"></div>
+  <div class="tbl-wrap">
+    <table>
       <thead><tr><th>#</th><th>Scope</th><th>Item</th><th>Batch</th><th>Owner</th><th>Status</th><th>History 5W</th><th>Catatan</th></tr></thead>
       <tbody id="wlog-body"></tbody>
     </table>
   </div>
 </div>
 
-<!-- RICE TAB -->
-<div class="tab-panel" id="tab-rice">
-  <div class="rice-hdr-box">
-    <strong style="color:white">&#128204; Panduan RICE</strong><br>
-    <strong style="color:var(--red)">Reach</strong> = pengajuan/agent terdampak/bln (pilot: max 10 pengajuan, 30 agent)&nbsp;
-    <strong style="color:var(--warn)">Impact</strong> = 3/2/1/0.5&nbsp;
-    <strong style="color:var(--purple)">Conf %</strong> = 100/80/50&nbsp;
-    <strong style="color:var(--info)">Effort</strong> = orang-bulan (isi bareng Zulfahmi)&nbsp;
-    <span style="color:var(--text)">RICE = (R&times;I&times;C%)/Effort &mdash; <strong>auto-hitung &amp; auto-save ke Sheets</strong>.</span>
+<!-- ═══ TAB: OKR RELEASE ═══ -->
+<div class="tab-pane" id="tab-okr">
+  <div class="sec-hdr">
+    <div class="sec-title">OKR Post-Launch Simetris</div>
+    <div style="font-size:12px;color:var(--ink3)">Target setelah app release. Edit nilai <em>current</em> di bawah atau langsung di sheet <code>okr_release</code>.</div>
   </div>
-  <div id="rice-container"></div>
+  <div id="okr-container">
+    <div class="loading"><div class="spin"></div>Loading OKR...</div>
+  </div>
 </div>
 
-<!-- NOTES TAB -->
-<div class="tab-panel" id="tab-notes">
-  <div class="sync-status-bar">
-    <span><span class="dot-ok" id="notes-sync-dot"></span> &nbsp;Semua perubahan auto-save ke Google Sheets</span>
-    <span>Last sync: <span id="notes-last-sync">&#8212;</span></span>
-    <button class="btn btn-ghost btn-sm" onclick="forceRefresh()">&#8635; Refresh dari Sheets</button>
-    <button class="btn btn-ghost btn-sm" onclick="showSetup()">&#9881; Ganti URL</button>
+<!-- ═══ TAB: RICE MODELLING ═══ -->
+<div class="tab-pane" id="tab-rice">
+  <div class="sec-hdr">
+    <div class="sec-title">RICE Modelling</div>
+    <div style="font-size:12px;color:var(--ink3)">Edit scope &amp; RICE langsung di sheet <code>scopes</code> dan <code>rice</code>. Web auto-refresh.</div>
   </div>
-  <div class="notes-grid">
-    <div><div class="notes-lbl">&#128683; Blockers &amp; Dependency</div><textarea class="notes-ta" id="n-blockers" placeholder="Blocker teknis, dependency, eskalasi..."></textarea></div>
-    <div><div class="notes-lbl">&#128203; Decision Log</div><textarea class="notes-ta" id="n-decisions" placeholder="Keputusan produk, scope change, alignment meeting..."></textarea></div>
-    <div><div class="notes-lbl">&#127919; OKR Resmi dari PM Hamdan</div><textarea class="notes-ta" id="n-okr" placeholder="Paste OKR resmi di sini..."></textarea></div>
-    <div><div class="notes-lbl">&#129309; Catatan Meeting</div><textarea class="notes-ta" id="n-meeting" placeholder="Summary meeting, feedback stakeholder, grooming..."></textarea></div>
+  <div class="rice-guide">
+    <b>Reach</b> = pengajuan/agent terdampak per bulan (pilot: max 10 pengajuan, 30 agent) &nbsp;·&nbsp;
+    <b>Impact</b> = 3 (KR gagal) / 2 (dorong kuat) / 1 (membantu) / 0.5 (minimal) &nbsp;·&nbsp;
+    <b>Conf %</b> = 100/80/50 &nbsp;·&nbsp;
+    <b>Effort</b> = orang-bulan (isi bareng Zulfahmi) &nbsp;·&nbsp;
+    RICE = (R × I × C%) / Effort — <b>auto-hitung</b>. Saran bisa diedit langsung.
   </div>
-  <div><div class="notes-lbl">&#128161; Misc / Parking Lot</div><textarea class="notes-ta" id="n-misc" placeholder="Ide, pertanyaan open..."></textarea></div>
+  <div id="rice-container">
+    <div class="loading"><div class="spin"></div>Loading RICE data...</div>
+  </div>
 </div>
 
-</div>
+</div><!-- .main -->
+
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════
-//  STATIC DATA (sama seperti v2)
-// ══════════════════════════════════════
-const OKR_DATA=[
-  {id:'O1',label:'Objective 1',title:'Launch MVP branchless digital agent platform',krs:[
-    {id:'O1K1',name:'Agent terdaftar aktif pilot',target:30,unit:'agent',clr:'red'},
-    {id:'O1K2',name:'SC-3 features delivered',target:100,unit:'%',clr:'ok'},
-    {id:'O1K3',name:'SC-4 features delivered',target:100,unit:'%',clr:'ok'},
-    {id:'O1K4',name:'Bug critical saat showcase',target:5,unit:'bugs',clr:'warn',invert:true},
-  ]},
-  {id:'O2',label:'Objective 2',title:'Capai pengajuan digital via app pada pilot',krs:[
-    {id:'O2K1',name:'Pengajuan masuk via app /bulan',target:10,unit:'pengajuan/bln',clr:'red'},
-    {id:'O2K2',name:'Konsumen onboarded via CGC',target:15,unit:'konsumen',clr:'ok'},
-    {id:'O2K3',name:'Order Form Agent ke Konsumen live',target:100,unit:'%',clr:'ok'},
-  ]},
-  {id:'O3',label:'Objective 3',title:'Enable agent productivity & engagement (SC-4)',krs:[
-    {id:'O3K1',name:'Modul Belajar + Bahan Promosi live',target:100,unit:'%',clr:'ok'},
-    {id:'O3K2',name:'Bonus Saya & Target Performa live',target:100,unit:'%',clr:'ok'},
-    {id:'O3K3',name:'Agent DAU/WAU ratio pilot',target:40,unit:'%',clr:'red'},
-  ]},
-  {id:'O4',label:'Objective 4',title:'Prospek management closed-loop',krs:[
-    {id:'O4K1',name:'Prospek Aplikasi SC-3 terdeliver',target:100,unit:'%',clr:'ok'},
-    {id:'O4K2',name:'Stepper status real-time ke agent',target:100,unit:'%',clr:'ok'},
-    {id:'O4K3',name:'Survey status update <=24 jam',target:90,unit:'%',clr:'red'},
-  ]},
-];
-
-const FEATURES=[
-  {id:'f1',batch:'SC-3',item:'APK Form',scope:'Risk Engine 1 (KYC)',owner:'Temmy'},
-  {id:'f2',batch:'SC-3',item:'APK Form',scope:'Risk Engine 2 (Address Validation)',owner:'Temmy'},
-  {id:'f3',batch:'SC-3',item:'APK Form',scope:'Assign Surveyor/CMO',owner:'Temmy'},
-  {id:'f4',batch:'SC-3',item:'Stepper Status',scope:'Stepper Regular',owner:'Temmy'},
-  {id:'f5',batch:'SC-3',item:'Stepper Status',scope:'Stepper RO',owner:'Temmy'},
-  {id:'f6',batch:'SC-3',item:'Stepper Status',scope:'Order Form SimFast ke CMO',owner:'Temmy'},
-  {id:'f7',batch:'SC-3',item:'Stepper Status',scope:'Notification Test',owner:'Temmy'},
-  {id:'f8',batch:'SC-3',item:'Kontrak',scope:'Menu Kontrak (list after verifikasi)',owner:'Temmy'},
-  {id:'f9',batch:'SC-3',item:'Kontrak',scope:'Pembayaran Kontrak',owner:'Temmy'},
-  {id:'f10',batch:'SC-3',item:'Kontrak',scope:'Reminder Notif jatuh tempo',owner:'Temmy'},
-  {id:'f11',batch:'SC-3',item:'Simulasi Kredit Agent',scope:'Order Form Agent',owner:'Fathan'},
-  {id:'f12',batch:'SC-3',item:'Simulasi Kredit Agent',scope:'Order Form ke Konsumen (LoanCode)',owner:'Fathan'},
-  {id:'f13',batch:'SC-3',item:'Simulasi Kredit Agent',scope:'Whole Flow Simulasi CGC',owner:'Fathan'},
-  {id:'f14',batch:'SC-3',item:'Prospek Aplikasi',scope:'List Prospek',owner:'Fathan'},
-  {id:'f15',batch:'SC-3',item:'Prospek Aplikasi',scope:'List Prospek Detail',owner:'Fathan'},
-  {id:'f16',batch:'SC-3',item:'Prospek Aplikasi',scope:'Mini Stepper',owner:'Fathan'},
-  {id:'f17',batch:'SC-3',item:'Prospek Aplikasi',scope:'Status Survey',owner:'Fathan'},
-  {id:'f18',batch:'SC-3',item:'Prospek Aplikasi',scope:'Informasi Source Input',owner:'Fathan'},
-  {id:'f19',batch:'SC-3',item:'Profile Staff Agent',scope:'Invite/Daftar Staff Agent',owner:'Fathan'},
-  {id:'f20',batch:'SC-3',item:'Profile Staff Agent',scope:'Onboarding Staff Agent',owner:'Fathan'},
-  {id:'f21',batch:'SC-3',item:'Profile Staff Agent',scope:'Profile Staff Agent',owner:'Fathan'},
-  {id:'f22',batch:'SC-3',item:'Profile Staff Agent',scope:'Simulasi Kredit Staff Agent',owner:'Fathan'},
-  {id:'f23',batch:'SC-3',item:'Profile Staff Agent',scope:'Prospek Aplikasi Staff Agent',owner:'Fathan'},
-  {id:'f24',batch:'SC-4',item:'Modul Belajar',scope:'Informasi Materi Belajar',owner:'Fathan'},
-  {id:'f25',batch:'SC-4',item:'Modul Belajar',scope:'Informasi Video Belajar',owner:'Fathan'},
-  {id:'f26',batch:'SC-4',item:'Modul Belajar',scope:'Detail & Preview Materi',owner:'Fathan'},
-  {id:'f27',batch:'SC-4',item:'Bahan Promosi',scope:'Informasi Bahan Promosi',owner:'Fathan'},
-  {id:'f28',batch:'SC-4',item:'Bahan Promosi',scope:'Downloadable Bahan Promosi',owner:'Fathan'},
-  {id:'f29',batch:'SC-4',item:'Bonus Saya',scope:'Informasi Detail Bonus',owner:'Fathan'},
-  {id:'f30',batch:'SC-4',item:'Bonus Saya',scope:'Informasi Detail Pajak',owner:'Fathan'},
-  {id:'f31',batch:'SC-4',item:'Bonus Saya',scope:'Informasi Detail Bonus Referral',owner:'Fathan'},
-  {id:'f32',batch:'SC-4',item:'Bonus Saya',scope:'Filtering Bulanan Bonus',owner:'Fathan'},
-  {id:'f33',batch:'SC-4',item:'Target Performa',scope:'Informasi Target & Pencapaian Bulanan',owner:'Fathan'},
-  {id:'f34',batch:'SC-4',item:'Target Performa',scope:'Feature Set Target',owner:'Fathan'},
-  {id:'f35',batch:'SC-4',item:'Target Performa',scope:'Informasi Level Agent',owner:'Fathan'},
-  {id:'f36',batch:'SC-4',item:'Target Performa',scope:'Informasi Target & Performa Referral',owner:'Fathan'},
-  {id:'f37',batch:'SC-4',item:'Target Performa',scope:'List Teman Referral',owner:'Fathan'},
-  {id:'f38',batch:'SC-4',item:'Target Performa',scope:'Detail Prospek Referral',owner:'Fathan'},
-];
-
-const RICE_DEFAULT={
-  f1:{r:10,i:3,c:100,e:1,saran:'Core KYC. Tanpa ini pengajuan tidak bisa diproses.'},
-  f2:{r:10,i:2,c:90,e:1,saran:'Address validation enabler disbursement.'},
-  f3:{r:10,i:3,c:100,e:1,saran:'Assign surveyor = trigger lapangan.'},
-  f4:{r:10,i:3,c:90,e:0.5,saran:'Semua pengajuan perlu tracking. KR O4K2.'},
-  f5:{r:6,i:2,c:80,e:0.5,saran:'RO case lebih jarang di pilot.'},
-  f6:{r:8,i:2,c:80,e:1,saran:'Edge case SimFast gagal ke CMO.'},
-  f7:{r:10,i:1,c:80,e:0.3,saran:'Notif test infra, enabler kritis.'},
-  f8:{r:8,i:3,c:90,e:1,saran:'Kontrak digital = core branchless. KR O1.'},
-  f9:{r:8,i:3,c:85,e:1.5,saran:'Payment integration = revenue enabler.'},
-  f10:{r:8,i:2,c:70,e:0.5,saran:'Reminder bantu NPL awal. Butuh BE push notif.'},
-  f11:{r:10,i:3,c:100,e:1,saran:'Core SC-3. Agent tidak bisa input tanpa ini.'},
-  f12:{r:10,i:3,c:90,e:1.5,saran:'LoanCode flow = jembatan agent ke konsumen. KR O2K3.'},
-  f13:{r:8,i:3,c:80,e:2,saran:'CGC full flow = 15 konsumen target. KR O2K2.'},
-  f14:{r:10,i:3,c:100,e:0.5,saran:'List prospek = view dasar agent.'},
-  f15:{r:10,i:2,c:90,e:0.5,saran:'Detail per prospek, enabler monitoring.'},
-  f16:{r:10,i:2,c:90,e:0.5,saran:'Mini stepper context real-time.'},
-  f17:{r:10,i:3,c:90,e:0.5,saran:'Survey status = KR O4K2 langsung.'},
-  f18:{r:8,i:1,c:80,e:0.3,saran:'Source info untuk analytics. Nice to have.'},
-  f19:{r:0,i:0.5,c:50,e:1,saran:'DEFER: tidak ada Staff Agent di pilot.'},
-  f20:{r:0,i:0.5,c:50,e:1,saran:'DEFER: onboarding staff agent, post-launch.'},
-  f21:{r:0,i:0.5,c:50,e:0.5,saran:'DEFER: profile staff agent, post-launch.'},
-  f22:{r:0,i:0.5,c:50,e:1,saran:'DEFER: sim kredit staff agent, post-launch.'},
-  f23:{r:0,i:0.5,c:50,e:0.5,saran:'DEFER: prospek staff agent, post-launch.'},
-  f24:{r:30,i:2,c:80,e:0.5,saran:'30 agent butuh materi. KR O3K1.'},
-  f25:{r:30,i:2,c:70,e:1,saran:'Video butuh CDN. Conf 70%.'},
-  f26:{r:20,i:1,c:80,e:0.5,saran:'Preview materi, nice to have.'},
-  f27:{r:30,i:2,c:90,e:0.5,saran:'Promosi material = conversion enabler. KR O3K1.'},
-  f28:{r:30,i:2,c:90,e:0.5,saran:'Download promo, effort rendah.'},
-  f29:{r:30,i:3,c:90,e:1,saran:'Visibility bonus = motivator utama. KR O3K2.'},
-  f30:{r:30,i:2,c:80,e:0.5,saran:'Transparansi pajak untuk agent profesional.'},
-  f31:{r:20,i:2,c:80,e:0.5,saran:'Bonus referral dorong AGA loop.'},
-  f32:{r:30,i:1,c:90,e:0.3,saran:'Filter bulan, UX basic.'},
-  f33:{r:30,i:3,c:90,e:0.5,saran:'Target vs pencapaian = motivasi utama. KR O3K2.'},
-  f34:{r:10,i:2,c:60,e:1,saran:'Set target sendiri. Conf 60%, perlu validasi SPV.'},
-  f35:{r:30,i:3,c:90,e:0.5,saran:'Level agent = gamifikasi. KR O3K3.'},
-  f36:{r:20,i:2,c:80,e:1,saran:'Performa referral = AGA network effect.'},
-  f37:{r:20,i:2,c:80,e:0.5,saran:'List teman referral, visibility jaringan.'},
-  f38:{r:15,i:2,c:70,e:0.5,saran:'Detail prospek referral. Conf 70%.'},
-};
-
-const STATUS_LIST=['todo','plan','wip','review','done','blocked','defer'];
-const STATUS_LABEL={todo:'TODO',plan:'PLAN',wip:'IN PROGRESS',review:'REVIEW',done:'DONE',blocked:'BLOCKED',defer:'DEFER'};
-const STATUS_CLR={todo:'#554040',plan:'#38BDF8',wip:'#F59E0B',review:'#A78BFA',done:'#22C55E',blocked:'#EF4444',defer:'#443333'};
-
-// ══════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════
-let GAS_URL = localStorage.getItem('simetris_gas_url') || '';
-let useSheets = !!GAS_URL;
-let S = {}; // local cache, always synced from/to Sheets or localStorage
+// ══════════════════════════════════════════════════════
+//  CONFIG & STATE
+// ══════════════════════════════════════════════════════
+let GAS_URL = localStorage.getItem('simetris_gas_v4') || '';
+let DB = { scopes:[], rice:[], weekly:[], okr:[], kr_weekly:[] };
 let weekOffset = 0;
 let wFilter = 'all';
-let debounceTimers = {};
+let progFilter = 'all';
+let debounce = {};
 
-// ══════════════════════════════════════
-//  SHEETS API LAYER
-//  GET  → JSONP (bypass CORS untuk read)
-//  POST → fetch no-cors + form-encoded (bypass CORS untuk write)
-// ══════════════════════════════════════
-function setSyncStatus(state){
-  const dot=document.getElementById('sync-dot');
-  const lbl=document.getElementById('sync-label');
-  if(!dot)return;
-  dot.className='sync-dot';
-  if(state==='loading'){lbl.textContent='Syncing...';dot.style.background='var(--info)';}
-  else if(state==='ok'){dot.classList.add('ok-dot');lbl.textContent='Sheets Connected';dot.style.animation='none';}
-  else if(state==='error'){dot.classList.add('err-dot');lbl.textContent='Offline (localStorage)';dot.style.animation='none';}
-  else{dot.style.background='var(--muted)';dot.style.animation='none';lbl.textContent='localStorage only';}
-  const nsd=document.getElementById('notes-sync-dot');
-  if(nsd){nsd.className=state==='ok'?'dot-ok':'dot-err';}
-  const nls=document.getElementById('notes-last-sync');
-  if(nls&&state==='ok')nls.textContent=new Date().toLocaleString('id-ID');
+const STATUS_LIST   = ['todo','plan','wip','review','done','blocked','defer'];
+const STATUS_LABEL  = {todo:'TODO',plan:'PLAN',wip:'IN PROGRESS',review:'REVIEW',done:'DONE',blocked:'BLOCKED',defer:'DEFER'};
+const STATUS_CLR    = {todo:'#aaa',plan:'#1D4ED8',wip:'#B45309',review:'#6D28D9',done:'#15803D',blocked:'#DC2626',defer:'#aaa'};
+const STATUS_CLS    = {todo:'ss-todo',plan:'ss-plan',wip:'ss-wip',review:'ss-review',done:'ss-done',blocked:'ss-blocked',defer:'ss-defer'};
+
+// ══════════════════════════════════════════════════════
+//  SHEETS COMMS (JSONP GET + no-cors POST)
+// ══════════════════════════════════════════════════════
+function syncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-lbl');
+  if (!dot) return;
+  dot.className = 'sync-dot';
+  if (state === 'syncing') { dot.classList.add('syncing'); lbl.textContent = 'Syncing...'; }
+  else if (state === 'ok')  { dot.classList.add('synced'); lbl.textContent = 'Sheets Connected'; }
+  else if (state === 'err') { dot.classList.add('err'); lbl.textContent = 'Offline'; }
+  else { lbl.textContent = 'localStorage only'; }
 }
 
-// JSONP helper — satu-satunya cara GET cross-origin ke GAS yang reliable
-function gasGet(params){
-  return new Promise((resolve,reject)=>{
-    const cbName='_gasCb_'+Date.now();
-    const script=document.createElement('script');
-    const timer=setTimeout(()=>{
-      delete window[cbName];
-      document.head.removeChild(script);
-      reject(new Error('JSONP timeout'));
-    },15000);
-    window[cbName]=function(data){
-      clearTimeout(timer);
-      delete window[cbName];
-      document.head.removeChild(script);
-      resolve(data);
-    };
-    const p=new URLSearchParams({...params,callback:cbName});
-    script.src=GAS_URL+'?'+p.toString();
-    script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject(new Error('Script load error'));};
-    document.head.appendChild(script);
+function gasGet(params) {
+  return new Promise((res, rej) => {
+    const cb = '_gc_' + Date.now();
+    const sc = document.createElement('script');
+    const t = setTimeout(() => { cleanup(); rej(new Error('Timeout')); }, 20000);
+    function cleanup() { clearTimeout(t); delete window[cb]; if (sc.parentNode) sc.parentNode.removeChild(sc); }
+    window[cb] = data => { cleanup(); res(data); };
+    sc.onerror = () => { cleanup(); rej(new Error('Network error')); };
+    sc.src = GAS_URL + '?' + new URLSearchParams({ ...params, callback: cb });
+    document.head.appendChild(sc);
   });
 }
 
-// POST pakai fetch no-cors — GAS terima ini, response opaque (kita tidak bisa baca),
-// tapi data TETAP tersimpan di Sheets. Fire-and-forget.
-function gasPost(body){
-  if(!GAS_URL)return Promise.resolve({ok:false});
-  // Encode sebagai form data supaya GAS bisa baca via e.postData
-  return fetch(GAS_URL,{
-    method:'POST',
-    mode:'no-cors',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify(body)
-  }).then(()=>({ok:true})).catch(()=>({ok:false}));
+function gasPost(body) {
+  if (!GAS_URL) return Promise.resolve({ ok: false });
+  return fetch(GAS_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(body)
+  }).then(() => ({ ok: true })).catch(() => ({ ok: false }));
 }
 
-// POST untuk initSheets — perlu baca response, pakai JSONP trick via GET
-function gasPostRead(body){
-  return new Promise((resolve,reject)=>{
-    const cbName='_gasCbP_'+Date.now();
-    const script=document.createElement('script');
-    const timer=setTimeout(()=>{
-      delete window[cbName];
-      if(document.head.contains(script))document.head.removeChild(script);
-      reject(new Error('Timeout'));
-    },20000);
-    window[cbName]=function(data){
-      clearTimeout(timer);
-      delete window[cbName];
-      if(document.head.contains(script))document.head.removeChild(script);
-      resolve(data);
-    };
-    // Kirim body sebagai param, GAS handle via doGet juga
-    const p=new URLSearchParams({action:body.action,callback:cbName,mode:'init'});
-    script.src=GAS_URL+'?'+p.toString();
-    script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject(new Error('Error'));};
-    document.head.appendChild(script);
-  });
-}
-
-async function loadFromSheets(){
-  if(!GAS_URL){loadFromLocal();setSyncStatus('local');return;}
-  setSyncStatus('loading');
-  try{
-    const data=await gasGet({action:'getAll'});
-    // merge sheets data into S
-    if(data.status) data.status.forEach(row=>{
-      const key='wst_'+row.feature_id+'_'+row.week_id;
-      S[key]=row.status;
-      S['st_'+row.feature_id]=row.status;
-      S['wnote_'+row.feature_id+'_'+row.week_id]=row.note||'';
-    });
-    if(data.kr) data.kr.forEach(row=>{ S['kr_'+row.kr_id]=row.value; });
-    if(data.rice) data.rice.forEach(row=>{
-      ['r','i','c','e'].forEach(f=>{ if(row[f]!=='') S['rc_'+f+'_'+row.feature_id]=row[f]; });
-      if(row.saran) S['rc_saran_'+row.feature_id]=row.saran;
-    });
-    if(data.notes) data.notes.forEach(row=>{ S['note_'+row.key]=row.value; });
-    if(data.snaps){
-      S.snaps={};
-      data.snaps.forEach(row=>{
-        S.snaps[row.week_id]={sc3:row.sc3_done,sc4:row.sc4_done,blk:row.blocked,krs:{}};
-        try{const kj=JSON.parse(row.kr_json||'{}');S.snaps[row.week_id].krs=kj;}catch(e){}
-      });
-    }
+async function loadData() {
+  syncStatus('syncing');
+  if (!GAS_URL) { loadLocal(); syncStatus('local'); return; }
+  try {
+    const data = await gasGet({ action: 'getAll' });
+    if (data.error) throw new Error(data.error);
+    DB.scopes  = (data.scopes  || []).filter(r => String(r.active).toLowerCase() !== 'false');
+    DB.rice    = data.rice    || [];
+    DB.weekly  = data.weekly  || [];
+    DB.okr     = data.okr     || [];
+    DB.kr_weekly = data.kr_weekly || [];
     saveLocal();
-    setSyncStatus('ok');
-    renderAll();
-  }catch(e){
-    console.error('Sheets load error',e);
-    setSyncStatus('error');
-    loadFromLocal();
+    syncStatus('ok');
+  } catch(e) {
+    console.error('Load error:', e);
+    syncStatus('err');
+    loadLocal();
+    toast('Gagal load dari Sheets, pakai cache lokal', 'err');
   }
-}
-
-function loadFromLocal(){
-  try{const r=localStorage.getItem('simetris_v3');if(r)S=JSON.parse(r);}catch(e){}
   renderAll();
 }
-function saveLocal(){localStorage.setItem('simetris_v3',JSON.stringify(S));}
 
-async function pushStatus(fid,wk,status,note){
-  saveLocal();
-  if(!GAS_URL)return;
-  try{await gasPost({action:'setStatus',feature_id:fid,week_id:wk,status,note:note||''});}
-  catch(e){setSyncStatus('error');}
+function loadLocal() {
+  try { const r = localStorage.getItem('simetris_db_v4'); if (r) DB = JSON.parse(r); } catch(e) {}
+  renderAll();
 }
-async function pushKR(id,value){
+function saveLocal() { localStorage.setItem('simetris_db_v4', JSON.stringify(DB)); }
+
+async function pushWeeklyStatus(scopeId, weekId, status, note) {
+  // Update local cache first
+  const key = weekId + '|' + scopeId;
+  const existing = DB.weekly.find(r => r.week_id === weekId && r.scope_id === scopeId);
+  if (existing) { existing.status = status; existing.note = note || ''; }
+  else DB.weekly.push({ week_id: weekId, scope_id: scopeId, status, note: note || '', updated_at: new Date().toISOString() });
   saveLocal();
-  if(!GAS_URL)return;
-  try{await gasPost({action:'setKR',kr_id:id,value});}
-  catch(e){setSyncStatus('error');}
-}
-async function pushRice(fid,field,value){
-  saveLocal();
-  if(!GAS_URL)return;
-  try{await gasPost({action:'setRice',feature_id:fid,field,value});}
-  catch(e){setSyncStatus('error');}
-}
-async function pushNote(key,value){
-  saveLocal();
-  if(!GAS_URL)return;
-  try{await gasPost({action:'setNote',key,value});}
-  catch(e){setSyncStatus('error');}
-}
-async function pushSnap(){
-  const sc3d=FEATURES.filter(f=>f.batch==='SC-3'&&(S['st_'+f.id]||'todo')==='done').length;
-  const sc4d=FEATURES.filter(f=>f.batch==='SC-4'&&(S['st_'+f.id]||'todo')==='done').length;
-  const blk=FEATURES.filter(f=>(S['st_'+f.id]||'todo')==='blocked').length;
-  const wk=weekId(0);
-  const krJson={};OKR_DATA.forEach(o=>o.krs.forEach(kr=>{krJson[kr.id]=krVal(kr.id);}));
-  if(!S.snaps)S.snaps={};
-  S.snaps[wk]={sc3:sc3d,sc4:sc4d,blk,krs:krJson};
-  saveLocal();
-  if(!GAS_URL)return;
-  try{await gasPost({action:'saveSnap',week_id:wk,sc3_done:sc3d,sc4_done:sc4d,blocked:blk,kr_json:JSON.stringify(krJson)});}
-  catch(e){}
+  if (!GAS_URL) return;
+  gasPost({ action: 'setWeeklyStatus', scope_id: scopeId, week_id: weekId, status, note: note || '' });
 }
 
-// ══════════════════════════════════════
+async function pushOkrValue(okrId, current) {
+  const row = DB.okr.find(r => r.id === okrId);
+  if (row) row.current = current;
+  saveLocal();
+  if (!GAS_URL) return;
+  gasPost({ action: 'setOkrValue', okr_id: okrId, current });
+}
+
+async function pushRiceField(scopeId, field, value) {
+  const row = DB.rice.find(r => r.scope_id === scopeId);
+  if (row) row[field] = value;
+  else DB.rice.push({ scope_id: scopeId, [field]: value });
+  saveLocal();
+  if (!GAS_URL) return;
+  gasPost({ action: 'setRiceField', scope_id: scopeId, field, value });
+}
+
+// ══════════════════════════════════════════════════════
 //  SETUP
-// ══════════════════════════════════════
-function showSetup(){
-  document.getElementById('setup-overlay').style.display='flex';
-  document.getElementById('gas-url-input').value=GAS_URL;
+// ══════════════════════════════════════════════════════
+function showSetup() {
+  document.getElementById('overlay').style.display = 'flex';
+  document.getElementById('gas-inp').value = GAS_URL;
 }
-function skipSetup(){
-  document.getElementById('setup-overlay').style.display='none';
-  setSyncStatus('local');
-  loadFromLocal();
+function skipSetup() {
+  document.getElementById('overlay').style.display = 'none';
+  syncStatus('local'); loadLocal();
 }
-async function connectAndInit(){
-  const url=document.getElementById('gas-url-input').value.trim();
-  if(!url||!url.includes('script.google.com')){
-    document.getElementById('setup-notice').textContent='URL tidak valid. Harus berformat https://script.google.com/macros/s/.../exec';
+async function doConnect() {
+  const url = document.getElementById('gas-inp').value.trim();
+  if (!url || !url.includes('script.google.com')) {
+    document.getElementById('setup-note').textContent = 'URL tidak valid';
     return;
   }
-  document.getElementById('setup-notice').textContent='Menghubungkan...';
-  GAS_URL=url;
-  localStorage.setItem('simetris_gas_url',url);
-  useSheets=true;
-  try{
-    // pakai JSONP (gasPostRead) karena perlu baca response dari initSheets
-    const res=await gasPostRead({action:'initSheets'});
-    if(res.ok){
-      document.getElementById('setup-notice').textContent='Connected! Sheet dibuat: '+((res.created||[]).join(', ')||'sudah ada sebelumnya');
-      toast('Sheets connected!','ok');
-      setTimeout(()=>{document.getElementById('setup-overlay').style.display='none';loadFromSheets();},1500);
-    }else{
-      document.getElementById('setup-notice').textContent='Error: '+(res.error||'Unknown');
+  document.getElementById('setup-note').textContent = 'Menghubungkan...';
+  GAS_URL = url;
+  localStorage.setItem('simetris_gas_v4', url);
+  try {
+    const res = await gasGet({ action: 'initSheets' });
+    if (res.ok) {
+      document.getElementById('setup-note').textContent = 'Connected! ' + (res.created?.length ? 'Sheet dibuat: ' + res.created.join(', ') : 'Sheet sudah ada.');
+      toast('Sheets connected!', 'ok');
+      setTimeout(() => { document.getElementById('overlay').style.display = 'none'; loadData(); }, 1200);
+    } else {
+      document.getElementById('setup-note').textContent = 'Error: ' + (res.error || 'Unknown');
     }
-  }catch(e){
-    document.getElementById('setup-notice').textContent='Gagal connect: '+e.message+'. Pastikan deployment set "Anyone" dan coba reload.';
+  } catch(e) {
+    document.getElementById('setup-note').textContent = 'Gagal: ' + e.message + '. Pastikan deployment set "Anyone".';
   }
 }
 
-// ══════════════════════════════════════
+// ══════════════════════════════════════════════════════
 //  WEEK UTILS
-// ══════════════════════════════════════
-function getMondayOf(offset){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay()+1+offset*7);return d;}
-function weekId(offset){return getMondayOf(offset).toISOString().slice(0,10);}
-function weekLabel(offset){
-  const mo=getMondayOf(offset);const su=new Date(mo);su.setDate(mo.getDate()+6);
-  const fmt=d=>d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
-  const tag=offset===0?' (Minggu Ini)':offset===-1?' (Minggu Lalu)':'';
-  return `${fmt(mo)} \u2013 ${fmt(su)}${tag}`;
+// ══════════════════════════════════════════════════════
+function getMonday(off) {
+  const d = new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - d.getDay() + 1 + off * 7);
+  return d;
+}
+function weekId(off) { return getMonday(off).toISOString().slice(0, 10); }
+function weekLabel(off) {
+  const mo = getMonday(off), su = new Date(mo); su.setDate(mo.getDate() + 6);
+  const f = d => d.toLocaleDateString('id-ID', { day:'numeric', month:'short' });
+  const tag = off === 0 ? ' (Minggu Ini)' : off === -1 ? ' (Minggu Lalu)' : '';
+  return `${f(mo)} – ${f(su)}${tag}`;
+}
+function shiftWeek(d) {
+  weekOffset += d;
+  renderProgress(); renderWeeklyLog();
+  document.getElementById('week-lbl').textContent = weekLabel(weekOffset);
+  document.getElementById('week-lbl2').textContent = weekLabel(weekOffset);
 }
 
-// ══════════════════════════════════════
+// ══════════════════════════════════════════════════════
 //  TABS
-// ══════════════════════════════════════
-function switchTab(name){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  document.querySelector(`.tab-btn[data-tab="${name}"]`).classList.add('active');
-  if(name==='rice')renderRice();
-  if(name==='weekly')renderWeekly();
-  if(name==='okr')renderOkr();
-}
-document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+// ══════════════════════════════════════════════════════
+document.querySelectorAll('.nav-tab').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('tab-' + b.dataset.tab).classList.add('active');
+  if (b.dataset.tab === 'rice') renderRice();
+  if (b.dataset.tab === 'okr') renderOkr();
+  if (b.dataset.tab === 'weekly') renderWeeklyLog();
+  if (b.dataset.tab === 'progress') renderProgress();
+}));
 
-// ══════════════════════════════════════
-//  DATES
-// ══════════════════════════════════════
-function renderDates(){
-  const now=new Date();
-  const fmt=d=>d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'});
-  document.getElementById('today-pill').textContent=fmt(now);
-  const du=t=>{const d=Math.round((new Date(t)-now)/86400000);return d<=0?'SUDAH':d+' hari';};
-  document.getElementById('tl-bar').innerHTML=`
-    <div class="tl-cell"><div class="tl-label">Hari Ini</div><div class="tl-val white" style="font-size:15px">${fmt(now)}</div><div class="tl-sub">Sprint aktif</div></div>
+// ══════════════════════════════════════════════════════
+//  RENDER: TIMELINE
+// ══════════════════════════════════════════════════════
+function renderTimeline() {
+  const now = new Date();
+  const du = t => { const d = Math.round((new Date(t) - now) / 86400000); return d <= 0 ? 'LEWAT' : d + ' hari'; };
+  const fmt = d => d.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short' });
+  document.getElementById('today-chip').textContent = fmt(now);
+  document.getElementById('tl-strip').innerHTML = `
+    <div class="tl-cell"><div class="tl-label">Hari Ini</div><div class="tl-val" style="font-size:15px;color:var(--ink)">${fmt(now)}</div></div>
     <div class="tl-cell"><div class="tl-label">App Release</div><div class="tl-val warn">30 Jun 2026</div><div class="tl-sub"><b>${du('2026-06-30')}</b> lagi</div></div>
     <div class="tl-cell"><div class="tl-label">Showcase 3</div><div class="tl-val red">23 Jul 2026</div><div class="tl-sub"><b>${du('2026-07-23')}</b> lagi</div></div>
     <div class="tl-cell"><div class="tl-label">Showcase 4</div><div class="tl-val info">27 Agt 2026</div><div class="tl-sub"><b>${du('2026-08-27')}</b> lagi</div></div>`;
 }
 
-// ══════════════════════════════════════
-//  OKR
-// ══════════════════════════════════════
-function krVal(id){return parseFloat(S['kr_'+id]||0);}
-
-function renderOkr(){
-  const sc3d=FEATURES.filter(f=>f.batch==='SC-3'&&(S['st_'+f.id]||'todo')==='done').length;
-  const sc4d=FEATURES.filter(f=>f.batch==='SC-4'&&(S['st_'+f.id]||'todo')==='done').length;
-  const blk=FEATURES.filter(f=>(S['st_'+f.id]||'todo')==='blocked').length;
-  document.getElementById('stats-row').innerHTML=`
-    <div class="stat-card"><div class="stat-label">SC-3 Done</div><div class="stat-val ${sc3d>=18?'ok':sc3d>=10?'warn':'red'}">${sc3d}</div><div class="stat-sub">/ 23 scopes</div></div>
-    <div class="stat-card"><div class="stat-label">SC-4 Done</div><div class="stat-val ${sc4d>=12?'ok':sc4d>=7?'warn':'red'}">${sc4d}</div><div class="stat-sub">/ 15 scopes</div></div>
-    <div class="stat-card"><div class="stat-label">Hari ke App</div><div class="stat-val warn">${Math.max(0,Math.round((new Date('2026-06-30')-new Date())/86400000))}</div><div class="stat-sub">30 Jun 2026</div></div>
-    <div class="stat-card"><div class="stat-label">Hari ke SC-3</div><div class="stat-val red">${Math.max(0,Math.round((new Date('2026-07-23')-new Date())/86400000))}</div><div class="stat-sub">23 Jul 2026</div></div>
-    <div class="stat-card"><div class="stat-label">Blocked</div><div class="stat-val ${blk>0?'red':'ok'}">${blk}</div><div class="stat-sub">fitur terblokir</div></div>`;
-  document.getElementById('okr-grid').innerHTML=OKR_DATA.map(obj=>{
-    const krs=obj.krs.map(kr=>{
-      const v=krVal(kr.id);
-      const pct=kr.invert?Math.max(0,100-(v/kr.target)*100):Math.min(100,(v/kr.target)*100);
-      const clr=pct>=90?'ok':pct>=50?'warn':'red';
-      const disp=kr.invert?`${v} open`:`${v} / ${kr.target} ${kr.unit}`;
-      return `<div>
-        <div class="kr-name">${kr.name}</div>
-        <div class="kr-head"><span></span><span class="kr-prog" style="color:var(--${kr.clr})">${disp}</span></div>
-        <div class="bar"><div class="bar-fill ${clr}" style="width:${pct}%"></div></div>
-        <div class="kr-row"><input class="kr-inp" type="number" min="0" value="${v}" onchange="setKr('${kr.id}',this.value)"><span class="kr-unit">${kr.unit}</span></div>
-      </div>`;
-    }).join('');
-    return `<div class="okr-card"><div class="okr-badge">${obj.label}</div><div class="okr-title">${obj.title}</div><div class="kr-list">${krs}</div></div>`;
-  }).join('');
-  renderHistory();
+// ══════════════════════════════════════════════════════
+//  RENDER: PROGRESS MINGGUAN
+// ══════════════════════════════════════════════════════
+function getStatus(scopeId, wid) {
+  const row = DB.weekly.find(r => String(r.scope_id) === String(scopeId) && String(r.week_id) === wid);
+  return (row && row.status) ? row.status : 'todo';
 }
 
-async function setKr(id,v){
-  S['kr_'+id]=v;
-  await pushKR(id,v);
-  await pushSnap();
+function renderProgress() {
+  const wid = weekId(weekOffset);
+  document.getElementById('week-lbl').textContent = weekLabel(weekOffset);
+
+  const scopes = DB.scopes;
+  const batches = ['SC-3', 'SC-4'];
+  const owners = [...new Set(scopes.map(s => s.owner).filter(Boolean))].sort();
+
+  // Build owner blocks
+  const html = owners.map(owner => {
+    const ownerScopes = scopes.filter(s => s.owner === owner);
+    const blocksHtml = batches.map(batch => {
+      const bs = ownerScopes.filter(s => String(s.batch) === batch);
+      if (!bs.length) return '';
+      const counts = {};
+      STATUS_LIST.forEach(st => counts[st] = 0);
+      bs.forEach(s => counts[getStatus(s.id, wid)]++);
+      const total = bs.length;
+      const donePct = Math.round((counts.done / total) * 100);
+      const wipPct  = Math.round((counts.wip / total) * 100);
+      const blkPct  = Math.round((counts.blocked / total) * 100);
+      const pills = STATUS_LIST.map(st => counts[st] > 0
+        ? `<span class="status-pill sp-${st}"><span>${counts[st]}</span>${STATUS_LABEL[st]}</span>`
+        : '').join('');
+      return `
+        <div class="batch-section">
+          <div class="batch-label"><span>${batch}</span><span>${donePct}% done</span></div>
+          <div class="status-summary">${pills}</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar">
+              <div class="pb-done" style="width:${donePct}%"></div>
+              <div class="pb-wip" style="width:${wipPct}%"></div>
+              <div class="pb-blocked" style="width:${blkPct}%"></div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const allOwnerDone = ownerScopes.filter(s => getStatus(s.id, wid) === 'done').length;
+    const allOwnerPct = ownerScopes.length ? Math.round((allOwnerDone / ownerScopes.length) * 100) : 0;
+
+    return `
+      <div class="owner-block">
+        <div class="owner-hdr">
+          <div class="owner-name">👤 ${owner}</div>
+          <div class="owner-pct">${allOwnerDone}/${ownerScopes.length} · ${allOwnerPct}% done</div>
+        </div>
+        ${blocksHtml}
+      </div>`;
+  }).join('');
+
+  document.getElementById('progress-grid').innerHTML = html || '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Belum ada data scope</div><div class="empty-sub">Hubungkan ke Sheets dan run setup</div></div>';
+
+  // Scope detail list
+  const filters = ['all', ...STATUS_LIST];
+  document.getElementById('prog-filter-row').innerHTML = filters.map(f =>
+    `<div class="fchip${progFilter === f ? ' on' : ''}" onclick="setProgFilter('${f}')">${f === 'all' ? 'Semua' : STATUS_LABEL[f] || f}</div>`
+  ).join('');
+
+  const past5 = [-4,-3,-2,-1,0].map(o => weekId(weekOffset + o));
+  let filteredScopes = scopes;
+  if (progFilter !== 'all') filteredScopes = scopes.filter(s => getStatus(s.id, wid) === progFilter);
+
+  document.getElementById('prog-scope-body').innerHTML = filteredScopes.length ? filteredScopes.map((s, i) => {
+    const st = getStatus(s.id, wid);
+    const bCls = String(s.batch) === 'SC-3' ? 'b-sc3' : 'b-sc4';
+    const dots = past5.map((pw, pi) => {
+      const pst = getStatus(s.id, pw);
+      return `<div class="hdot" title="${weekLabel(weekOffset - 4 + pi)}: ${STATUS_LABEL[pst]}" style="background:${STATUS_CLR[pst]};opacity:${pi === 4 ? 1 : 0.45}"></div>`;
+    }).join('');
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)">${i+1}</td>
+      <td class="td-scope">${s.scope || ''}</td>
+      <td class="td-item">${s.item || ''}</td>
+      <td class="td-batch"><span class="${bCls}">${s.batch}</span></td>
+      <td class="td-owner" style="font-family:'JetBrains Mono',monospace;font-size:10px">${s.owner || ''}</td>
+      <td><span class="status-pill sp-${st}">${STATUS_LABEL[st]}</span></td>
+      <td><div class="hist-dots">${dots}</div></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" class="empty" style="padding:24px;text-align:center;color:var(--ink3)">Tidak ada scope dengan status ini</td></tr>';
+}
+
+function setProgFilter(f) { progFilter = f; renderProgress(); }
+
+// ══════════════════════════════════════════════════════
+//  RENDER: WEEKLY LOG
+// ══════════════════════════════════════════════════════
+function renderWeeklyLog() {
+  const wid = weekId(weekOffset);
+  document.getElementById('week-lbl2').textContent = weekLabel(weekOffset);
+
+  const filters = ['all', 'SC-3', 'SC-4', ...STATUS_LIST];
+  document.getElementById('wlog-filter-row').innerHTML = filters.map(f =>
+    `<div class="fchip${wFilter === f ? ' on' : ''}" onclick="setWFilter('${f}')">${f === 'all' ? 'Semua' : f === 'SC-3' || f === 'SC-4' ? f : STATUS_LABEL[f]}</div>`
+  ).join('');
+
+  let scopes = DB.scopes;
+  if (wFilter === 'SC-3') scopes = scopes.filter(s => String(s.batch) === 'SC-3');
+  else if (wFilter === 'SC-4') scopes = scopes.filter(s => String(s.batch) === 'SC-4');
+  else if (STATUS_LIST.includes(wFilter)) scopes = scopes.filter(s => getStatus(s.id, wid) === wFilter);
+
+  const past5 = [-4,-3,-2,-1,0].map(o => weekId(weekOffset + o));
+
+  document.getElementById('wlog-body').innerHTML = scopes.length ? scopes.map((s, i) => {
+    const st = getStatus(s.id, wid);
+    const noteRow = DB.weekly.find(r => String(r.scope_id) === String(s.id) && String(r.week_id) === wid);
+    const note = noteRow ? (noteRow.note || '') : '';
+    const bCls = String(s.batch) === 'SC-3' ? 'b-sc3' : 'b-sc4';
+    const opts = STATUS_LIST.map(x => `<option value="${x}"${st === x ? ' selected' : ''}>${STATUS_LABEL[x]}</option>`).join('');
+    const dots = past5.map((pw, pi) => {
+      const pst = getStatus(s.id, pw);
+      return `<div class="hdot" title="${weekLabel(weekOffset - 4 + pi)}: ${STATUS_LABEL[pst]}" style="background:${STATUS_CLR[pst]};opacity:${pi === 4 ? 1 : 0.45};${pi === 4 ? 'outline:1px solid rgba(0,0,0,.15)' : ''}"></div>`;
+    }).join('');
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)">${i+1}</td>
+      <td class="td-scope">${s.scope || ''}</td>
+      <td class="td-item">${s.item || ''}</td>
+      <td class="td-batch"><span class="${bCls}">${s.batch}</span></td>
+      <td class="td-owner" style="font-family:'JetBrains Mono',monospace;font-size:10px">${s.owner || ''}</td>
+      <td>
+        <select class="status-sel ${STATUS_CLS[st]}" onchange="onStatusChange('${s.id}','${wid}',this.value,this)">
+          ${opts}
+        </select>
+      </td>
+      <td><div class="hist-dots">${dots}</div></td>
+      <td><input class="note-inp" type="text" value="${note}" placeholder="Catatan..." onchange="onNoteChange('${s.id}','${wid}',this.value)"></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--ink3);font-size:13px">Tidak ada scope</td></tr>';
+}
+
+function setWFilter(f) { wFilter = f; renderWeeklyLog(); }
+
+function onStatusChange(scopeId, wid, val, sel) {
+  sel.className = 'status-sel ' + STATUS_CLS[val];
+  const noteEl = sel.closest('tr').querySelector('.note-inp');
+  const note = noteEl ? noteEl.value : '';
+  pushWeeklyStatus(scopeId, wid, val, note);
+  renderProgress();
+  toast(STATUS_LABEL[val], 'ok');
+}
+
+function onNoteChange(scopeId, wid, val) {
+  clearTimeout(debounce['note_' + scopeId]);
+  debounce['note_' + scopeId] = setTimeout(() => {
+    const st = getStatus(scopeId, wid);
+    pushWeeklyStatus(scopeId, wid, st, val);
+  }, 1000);
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER: OKR RELEASE
+// ══════════════════════════════════════════════════════
+function renderOkr() {
+  const okrs = DB.okr;
+  if (!okrs.length) {
+    document.getElementById('okr-container').innerHTML = '<div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">Belum ada OKR</div><div class="empty-sub">Isi sheet <code>okr_release</code> di Google Sheets, lalu refresh.</div></div>';
+    return;
+  }
+
+  // Group by objective
+  const grouped = {};
+  okrs.forEach(kr => {
+    const obj = kr.objective || 'Lainnya';
+    if (!grouped[obj]) grouped[obj] = [];
+    grouped[obj].push(kr);
+  });
+
+  const html = Object.entries(grouped).map(([obj, krs]) => {
+    const owner = [...new Set(krs.map(k => k.owner).filter(Boolean))].join(', ');
+    const krsHtml = krs.map(kr => {
+      const cur = parseFloat(kr.current) || 0;
+      const tgt = parseFloat(kr.target) || 1;
+      const pct = Math.min(100, Math.round((cur / tgt) * 100));
+      const clr = pct >= 90 ? 'ok' : pct >= 50 ? 'warn' : 'red';
+
+      // Format large numbers
+      let tgtDisplay = kr.target;
+      let curDisplay = cur;
+      if (parseFloat(kr.target) >= 1000000000) {
+        tgtDisplay = 'Rp ' + (parseFloat(kr.target)/1000000000000).toFixed(1) + 'T';
+        curDisplay = cur >= 1000000000000 ? 'Rp ' + (cur/1000000000000).toFixed(1) + 'T' : cur.toLocaleString('id-ID');
+      }
+
+      return `<div class="kr-row">
+        <div>
+          <div class="kr-name">${kr.kr_name || ''}</div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:2px">Target: ${tgtDisplay} ${kr.unit || ''}</div>
+        </div>
+        <div class="kr-bar-wrap">
+          <div class="kr-bar"><div class="kr-bar-fill ${clr}" style="width:${pct}%"></div></div>
+          <div class="kr-pct">${pct}%</div>
+        </div>
+        <div class="kr-inp-wrap">
+          <input class="kr-inp" type="number" min="0" value="${cur}" onchange="onOkrChange('${kr.id}',this.value)">
+          <span class="kr-unit">${kr.unit || ''}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="objective-card">
+      <div class="obj-hdr">
+        <div class="obj-title">${obj}</div>
+        <div class="obj-owner">${owner}</div>
+      </div>
+      <div class="kr-rows">${krsHtml}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('okr-container').innerHTML = html;
+}
+
+function onOkrChange(okrId, val) {
+  clearTimeout(debounce['okr_' + okrId]);
+  debounce['okr_' + okrId] = setTimeout(() => { pushOkrValue(okrId, val); }, 800);
+  // update bar realtime
   renderOkr();
 }
 
-// ══════════════════════════════════════
-//  HISTORY SPARKLINES
-// ══════════════════════════════════════
-function renderHistory(){
-  const snaps=S.snaps||{};
-  const weeks=Object.keys(snaps).sort().slice(-8);
-  const metrics=[
-    {key:'sc3',label:'SC-3 Scopes Done',max:23,color:'var(--red)'},
-    {key:'sc4',label:'SC-4 Scopes Done',max:15,color:'var(--purple)'},
-    {key:'blk',label:'Blocked Items',max:10,color:'var(--danger)'},
-  ];
-  OKR_DATA.forEach(o=>o.krs.slice(0,2).forEach(kr=>{
-    metrics.push({key:'kr_'+kr.id,label:kr.name.slice(0,32),max:kr.target,color:'var(--warn)',krId:kr.id});
-  }));
-  document.getElementById('history-grid').innerHTML=metrics.map(m=>{
-    const vals=weeks.map(w=>{const sn=snaps[w]||{};return m.krId?parseFloat((sn.krs&&sn.krs[m.krId])||0):parseFloat(sn[m.key]||0);});
-    const maxV=Math.max(...vals,1);
-    const curr=vals[vals.length-1]||0;
-    const bars=vals.length?vals.map((v,i)=>{
-      const h=Math.max(4,Math.round((v/maxV)*32));
-      const op=0.4+0.6*(i/Math.max(vals.length-1,1));
-      return `<div class="spark-bar" style="height:${h}px;background:${m.color};opacity:${op}" data-tip="${weeks[i]}: ${v}"></div>`;
-    }).join(''):'<span style="color:var(--muted);font-size:10px">Belum ada data</span>';
-    const pct=Math.min(100,Math.round((curr/m.max)*100));
-    return `<div class="hcard"><div class="hcard-title">${m.label}</div><div class="sparkline">${bars}</div><div class="hcard-current" style="color:${m.color}">${curr}<span style="font-size:13px;font-weight:400;color:var(--muted)"> / ${m.max} (${pct}%)</span></div></div>`;
-  }).join('');
+// ══════════════════════════════════════════════════════
+//  RENDER: RICE
+// ══════════════════════════════════════════════════════
+function calcRice(r) {
+  const reach   = parseFloat(r.reach)    || 0;
+  const impact  = parseFloat(r.impact)   || 0;
+  const conf    = parseFloat(r.conf_pct) || 0;
+  const effort  = parseFloat(r.effort)   || 0;
+  if (effort === 0) return { nilai: 0, rice: 0 };
+  const nilai = reach * impact * (conf / 100);
+  return { nilai: Math.round(nilai * 10) / 10, rice: Math.round(nilai / effort * 10) / 10 };
 }
 
-// ══════════════════════════════════════
-//  WEEKLY LOG
-// ══════════════════════════════════════
-function shiftWeek(d){weekOffset+=d;renderWeekly();}
+function renderRice() {
+  const scopes = DB.scopes;
+  if (!scopes.length) {
+    document.getElementById('rice-container').innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Belum ada data scope</div><div class="empty-sub">Hubungkan ke Sheets dan run setup</div></div>';
+    return;
+  }
 
-function renderWeekly(){
-  const wk=weekId(weekOffset);
-  document.getElementById('week-lbl').textContent=weekLabel(weekOffset);
-  const filters=['all','SC-3','SC-4','wip','review','blocked','done','defer'];
-  document.getElementById('filter-row').innerHTML=filters.map(f=>`<div class="fchip${wFilter===f?' on':''}" onclick="setWFilter('${f}')">${f==='all'?'Semua':f}</div>`).join('');
-  let items=FEATURES;
-  if(wFilter==='SC-3')items=items.filter(f=>f.batch==='SC-3');
-  else if(wFilter==='SC-4')items=items.filter(f=>f.batch==='SC-4');
-  else if(STATUS_LIST.includes(wFilter))items=items.filter(f=>(S['st_'+f.id]||'todo')===wFilter);
-  const past5=[-4,-3,-2,-1,0].map(o=>weekId(weekOffset+o));
-  document.getElementById('wlog-body').innerHTML=items.map((f,i)=>{
-    const stKey='wst_'+f.id+'_'+wk;
-    const noteKey='wnote_'+f.id+'_'+wk;
-    const st=S[stKey]||S['st_'+f.id]||'todo';
-    const note=S[noteKey]||'';
-    const opts=STATUS_LIST.map(s=>`<option value="${s}"${st===s?' selected':''}>${STATUS_LABEL[s]}</option>`).join('');
-    const dots=past5.map((pw,pi)=>{
-      const pst=S['wst_'+f.id+'_'+pw]||S['st_'+f.id]||'todo';
-      return `<div class="hdot" title="${weekLabel(weekOffset-4+pi)}: ${STATUS_LABEL[pst]}" style="background:${STATUS_CLR[pst]};opacity:${pi===4?1:0.45};${pi===4?'outline:1px solid rgba(255,255,255,.25)':''}"></div>`;
-    }).join('');
-    const bCls=f.batch==='SC-3'?'b-sc3':'b-sc4';
-    return `<tr>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${i+1}</td>
-      <td class="td-scope">${f.scope}</td>
-      <td class="td-item">${f.item}</td>
-      <td><span class="${bCls}" style="font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid">${f.batch}</span></td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${f.owner}</td>
-      <td><select class="status-sel s-${st}" onchange="setWStatus('${f.id}','${wk}',this.value,this)">${opts}</select></td>
-      <td><div class="hist-dots">${dots}</div></td>
-      <td class="td-note"><textarea rows="2" onchange="setWNote('${f.id}','${wk}',this.value)">${note}</textarea></td>
-    </tr>`;
-  }).join('');
-}
-
-function setWFilter(f){wFilter=f;renderWeekly();}
-
-async function setWStatus(fid,wk,val,sel){
-  S['wst_'+fid+'_'+wk]=val;S['st_'+fid]=val;
-  sel.className='status-sel s-'+val;
-  await pushStatus(fid,wk,val,S['wnote_'+fid+'_'+wk]||'');
-  await pushSnap();
-  renderOkr();renderWeekly();
-  toast(STATUS_LABEL[val]+' \u2192 saved','ok');
-}
-
-function setWNote(fid,wk,val){
-  S['wnote_'+fid+'_'+wk]=val;
-  clearTimeout(debounceTimers['note_'+fid]);
-  debounceTimers['note_'+fid]=setTimeout(()=>{
-    pushStatus(fid,wk,S['wst_'+fid+'_'+wk]||S['st_'+fid]||'todo',val);
-  },1200);
-}
-
-// ══════════════════════════════════════
-//  RICE
-// ══════════════════════════════════════
-function calcRice(fid){
-  const get=(k,fb)=>{const v=S['rc_'+k+'_'+fid];return v!==undefined?parseFloat(v):fb;};
-  const d=RICE_DEFAULT[fid]||{};
-  const r=get('r',d.r),i=get('i',d.i),c=get('c',d.c),e=get('e',d.e);
-  if([r,i,c,e].some(v=>v===undefined||isNaN(v))||e===0)return{nilai:null,rice:null};
-  const n=Math.round(r*i*(c/100)*10)/10;
-  return{nilai:n,rice:Math.round(n/e*10)/10};
-}
-
-function renderRice(){
-  document.getElementById('rice-container').innerHTML=['SC-3','SC-4'].map(batch=>{
-    const items=FEATURES.filter(f=>f.batch===batch);
-    const deadline=batch==='SC-3'?'23 Jul 2026':'27 Agt 2026';
-    const bCls=batch==='SC-3'?'badge-sc3':'badge-sc4';
-    const rows=items.map(f=>{
-      const d=RICE_DEFAULT[f.id]||{};
-      const get=k=>{const v=S['rc_'+k+'_'+f.id];return v!==undefined?v:(d[k]!==undefined?d[k]:'');};
-      const {nilai,rice}=calcRice(f.id);
-      const rnk=rice===null?'&mdash;':rice>=20?'HIGH':rice>=8?'MID':rice>0?'LOW':'ZERO';
-      const rnkCls=rice===null?'':rice>=20?'r-high':rice>=8?'r-mid':rice>0?'r-low':'r-zero';
-      const saran=S['rc_saran_'+f.id]!==undefined?S['rc_saran_'+f.id]:(d.saran||'');
+  const batches = ['SC-3','SC-4'];
+  const html = batches.map(batch => {
+    const bs = scopes.filter(s => String(s.batch) === batch);
+    if (!bs.length) return '';
+    const rows = bs.map(s => {
+      const rd = DB.rice.find(r => String(r.scope_id) === String(s.id)) || {};
+      const { nilai, rice } = calcRice(rd);
+      const rnk = rice >= 20 ? 'HIGH' : rice >= 8 ? 'MID' : rice > 0 ? 'LOW' : 'ZERO';
+      const rnkCls = rice >= 20 ? 'r-high' : rice >= 8 ? 'r-mid' : rice > 0 ? 'r-low' : 'r-zero';
+      const saran = rd.saran || '';
+      const bCls = batch === 'SC-3' ? 'b-sc3' : 'b-sc4';
+      const get = k => rd[k] !== undefined && rd[k] !== '' ? rd[k] : '';
       return `<tr>
-        <td class="td-scope-r">${f.scope}</td><td class="td-item-r">${f.item}</td>
-        <td><input class="rice-inp" type="number" min="0" step="1" value="${get('r')}" placeholder="&mdash;" onchange="setRice('${f.id}','r',this.value)"></td>
-        <td><input class="rice-inp" type="number" min="0.25" max="3" step="0.25" value="${get('i')}" placeholder="&mdash;" onchange="setRice('${f.id}','i',this.value)"></td>
-        <td><input class="rice-inp" type="number" min="0" max="100" step="10" value="${get('c')}" placeholder="&mdash;" onchange="setRice('${f.id}','c',this.value)"></td>
-        <td class="td-nilai" id="nv-${f.id}">${nilai!==null?nilai:'&mdash;'}</td>
-        <td><input class="rice-inp" type="number" min="0.1" step="0.1" value="${get('e')}" placeholder="&mdash;" onchange="setRice('${f.id}','e',this.value)"></td>
-        <td class="td-rice" id="rv-${f.id}">${rice!==null?`<span class="rank ${rnkCls}">${rnk}</span><br><span style="font-size:14px">${rice}</span>`:'<span style="color:var(--muted)">&mdash;</span>'}</td>
-        <td class="td-saran"><textarea rows="2" onchange="setSaran('${f.id}',this.value)">${saran}</textarea></td>
+        <td class="td-scope-r">${s.scope || ''}</td>
+        <td class="td-item-r">${s.item || ''}</td>
+        <td class="td-batch"><span class="${bCls}">${batch}</span></td>
+        <td><input class="rice-inp" type="number" min="0" step="1"    value="${get('reach')}"    placeholder="—" onchange="onRiceChange('${s.id}','reach',this.value)"></td>
+        <td><input class="rice-inp" type="number" min="0.25" max="3" step="0.25" value="${get('impact')}"   placeholder="—" onchange="onRiceChange('${s.id}','impact',this.value)"></td>
+        <td><input class="rice-inp" type="number" min="0" max="100" step="10"  value="${get('conf_pct')}" placeholder="—" onchange="onRiceChange('${s.id}','conf_pct',this.value)"></td>
+        <td class="td-nilai" id="nv-${s.id}">${nilai || '—'}</td>
+        <td><input class="rice-inp" type="number" min="0.1" step="0.1" value="${get('effort')}"   placeholder="—" onchange="onRiceChange('${s.id}','effort',this.value)"></td>
+        <td class="td-rice-final" id="rv-${s.id}">
+          ${rice > 0 ? `<span class="rank ${rnkCls}">${rnk}</span><br><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">${rice}</span>` : '<span style="color:var(--ink3)">—</span>'}
+        </td>
+        <td><textarea class="saran-ta" rows="2" onchange="onSaranChange('${s.id}',this.value)">${saran}</textarea></td>
       </tr>`;
     }).join('');
-    return `<div class="rice-sec-hdr">${batch} Features <span class="badge ${bCls}">${batch}</span> <span style="font-size:11px;color:var(--muted)">Deadline: ${deadline}</span></div>
-    <div class="tbl-wrap"><table class="rice-tbl"><thead><tr><th>Scope</th><th>Item</th><th>Reach</th><th>Impact</th><th>Conf %</th><th>Nilai Bisnis</th><th>Effort (TL)</th><th>RICE Final</th><th>Saran (editable)</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+
+    const bCls2 = batch === 'SC-3' ? 'badge-sc3' : 'badge-sc4';
+    const deadline = batch === 'SC-3' ? '23 Jul 2026' : '27 Agt 2026';
+    return `
+      <div style="display:flex;gap:10px;align-items:center;margin:24px 0 10px;padding-bottom:8px;border-bottom:2px solid var(--red)">
+        <span style="font-size:14px;font-weight:700;color:var(--ink)">${batch} Features</span>
+        <span class="badge ${bCls2}">${batch}</span>
+        <span style="font-size:11px;color:var(--ink3)">Deadline: ${deadline}</span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="rice-tbl">
+          <thead><tr><th>Scope</th><th>Item</th><th>Batch</th><th>Reach</th><th>Impact</th><th>Conf %</th><th>Nilai</th><th>Effort</th><th>RICE</th><th>Saran (editable)</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
   }).join('');
+
+  document.getElementById('rice-container').innerHTML = html;
 }
 
-async function setRice(fid,field,val){
-  S['rc_'+field+'_'+fid]=val;
-  clearTimeout(debounceTimers['rice_'+fid+'_'+field]);
-  debounceTimers['rice_'+fid+'_'+field]=setTimeout(()=>pushRice(fid,field,val),800);
-  const{nilai,rice}=calcRice(fid);
-  const nEl=document.getElementById('nv-'+fid),rEl=document.getElementById('rv-'+fid);
-  if(nEl)nEl.innerHTML=nilai!==null?nilai:'&mdash;';
-  if(rEl){
-    const rnk=rice===null?'&mdash;':rice>=20?'HIGH':rice>=8?'MID':rice>0?'LOW':'ZERO';
-    const rnkCls=rice===null?'':rice>=20?'r-high':rice>=8?'r-mid':rice>0?'r-low':'r-zero';
-    rEl.innerHTML=rice!==null?`<span class="rank ${rnkCls}">${rnk}</span><br><span style="font-size:14px">${rice}</span>`:'<span style="color:var(--muted)">&mdash;</span>';
+function onRiceChange(scopeId, field, val) {
+  const rd = DB.rice.find(r => String(r.scope_id) === String(scopeId));
+  if (rd) rd[field] = val; else DB.rice.push({ scope_id: scopeId, [field]: val });
+  saveLocal();
+  // Recalc display
+  const rd2 = DB.rice.find(r => String(r.scope_id) === String(scopeId)) || {};
+  const { nilai, rice } = calcRice(rd2);
+  const nEl = document.getElementById('nv-' + scopeId);
+  const rEl = document.getElementById('rv-' + scopeId);
+  if (nEl) nEl.textContent = nilai || '—';
+  if (rEl) {
+    const rnk = rice >= 20 ? 'HIGH' : rice >= 8 ? 'MID' : rice > 0 ? 'LOW' : 'ZERO';
+    const rnkCls = rice >= 20 ? 'r-high' : rice >= 8 ? 'r-mid' : rice > 0 ? 'r-low' : 'r-zero';
+    rEl.innerHTML = rice > 0
+      ? `<span class="rank ${rnkCls}">${rnk}</span><br><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">${rice}</span>`
+      : '<span style="color:var(--ink3)">—</span>';
   }
+  clearTimeout(debounce['rice_' + scopeId + '_' + field]);
+  debounce['rice_' + scopeId + '_' + field] = setTimeout(() => pushRiceField(scopeId, field, val), 800);
 }
 
-async function setSaran(fid,val){
-  S['rc_saran_'+fid]=val;
-  clearTimeout(debounceTimers['saran_'+fid]);
-  debounceTimers['saran_'+fid]=setTimeout(()=>pushRice(fid,'saran',val),800);
+function onSaranChange(scopeId, val) {
+  clearTimeout(debounce['saran_' + scopeId]);
+  debounce['saran_' + scopeId] = setTimeout(() => pushRiceField(scopeId, 'saran', val), 1000);
 }
 
-// ══════════════════════════════════════
-//  NOTES
-// ══════════════════════════════════════
-function loadNotes(){
-  ['blockers','decisions','okr','meeting','misc'].forEach(k=>{
-    const el=document.getElementById('n-'+k);
-    if(!el)return;
-    el.value=S['note_'+k]||'';
-    el.addEventListener('input',()=>{
-      S['note_'+k]=el.value;
-      saveLocal();
-      clearTimeout(debounceTimers['note_key_'+k]);
-      debounceTimers['note_key_'+k]=setTimeout(()=>pushNote(k,el.value),1200);
-    });
-  });
+// ══════════════════════════════════════════════════════
+//  TOAST & REFRESH
+// ══════════════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show t-${type}`;
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ══════════════════════════════════════
-//  REFRESH & RENDER ALL
-// ══════════════════════════════════════
-function forceRefresh(){
-  setSyncStatus('loading');
-  loadFromSheets();
-  toast('Refreshing dari Sheets...');
+function doRefresh() { syncStatus('syncing'); loadData(); toast('Refreshing...', 'info'); }
+
+// ══════════════════════════════════════════════════════
+//  RENDER ALL
+// ══════════════════════════════════════════════════════
+function renderAll() {
+  renderTimeline();
+  renderProgress();
+  renderWeeklyLog();
+  // OKR & RICE rendered on tab switch
+  // But re-render if tab is already active
+  if (document.getElementById('tab-okr').classList.contains('active')) renderOkr();
+  if (document.getElementById('tab-rice').classList.contains('active')) renderRice();
 }
 
-function renderAll(){renderDates();renderOkr();renderWeekly();loadNotes();}
-
-function toast(msg,type){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.className='toast show'+(type==='ok'?' ok-toast':'');
-  clearTimeout(window._toastTimer);
-  window._toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
-}
-
-// ══════════════════════════════════════
+// ══════════════════════════════════════════════════════
 //  INIT
-// ══════════════════════════════════════
-document.addEventListener('DOMContentLoaded',()=>{
-  if(GAS_URL){
-    document.getElementById('setup-overlay').style.display='none';
-    loadFromSheets();
+// ══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Init week labels
+  document.getElementById('week-lbl').textContent = weekLabel(0);
+  document.getElementById('week-lbl2').textContent = weekLabel(0);
+
+  if (GAS_URL) {
+    document.getElementById('overlay').style.display = 'none';
+    loadData();
   } else {
-    // show setup for first time, but also load local in background
-    loadFromLocal();
+    loadLocal();
   }
-  renderDates();
-  // auto-refresh every 2 minutes if connected
-  setInterval(()=>{if(GAS_URL)loadFromSheets();},120000);
+  // Auto-refresh every 2 minutes
+  setInterval(() => { if (GAS_URL) loadData(); }, 120000);
 });
 </script>
 </body>
