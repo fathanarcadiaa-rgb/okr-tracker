@@ -310,6 +310,7 @@ td{padding:9px 12px;vertical-align:middle;}
   <nav class="nav-tabs">
     <button class="nav-tab active" data-tab="progress">Progress Mingguan</button>
     <button class="nav-tab" data-tab="weekly">Weekly Log</button>
+    <button class="nav-tab" data-tab="scopes">Manage Scopes</button>
     <button class="nav-tab" data-tab="okr">OKR Release</button>
     <button class="nav-tab" data-tab="rice">RICE Modelling</button>
   </nav>
@@ -382,6 +383,62 @@ td{padding:9px 12px;vertical-align:middle;}
   </div>
   <div id="okr-container">
     <div class="loading"><div class="spin"></div>Loading OKR...</div>
+  </div>
+</div>
+
+<!-- ═══ TAB: SCOPES MANAGEMENT ═══ -->
+<div class="tab-pane" id="tab-scopes">
+  <div class="sec-hdr">
+    <div class="sec-title">Manage Scopes</div>
+    <div style="font-size:12px;color:var(--ink3)">Add/delete/filter scopes untuk semua minggu</div>
+  </div>
+
+  <!-- ADD SCOPE FORM -->
+  <div style="background:var(--bg2);border:1.5px solid var(--red-border);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px;">
+    <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:16px;">➕ Add New Scope</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;">
+      <div>
+        <div class="inp-lbl">ID</div>
+        <input type="text" id="add-scope-id" placeholder="f39" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:12px;">
+      </div>
+      <div>
+        <div class="inp-lbl">Scope Name</div>
+        <input type="text" id="add-scope-name" placeholder="Risk Engine 3" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:var(--radius);font-size:12px;">
+      </div>
+      <div>
+        <div class="inp-lbl">Item</div>
+        <input type="text" id="add-scope-item" placeholder="APK Form" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:var(--radius);font-size:12px;">
+      </div>
+      <div>
+        <div class="inp-lbl">Batch</div>
+        <select id="add-scope-batch" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:var(--radius);font-size:12px;">
+          <option value="SC-3">SC-3</option>
+          <option value="SC-4">SC-4</option>
+        </select>
+      </div>
+      <div>
+        <div class="inp-lbl">Owner</div>
+        <select id="add-scope-owner" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:var(--radius);font-size:12px;">
+          <option value="Temmy">Temmy</option>
+          <option value="Fathan">Fathan</option>
+        </select>
+      </div>
+      <button class="btn btn-red" onclick="addNewScope()" style="height:36px;">Add</button>
+    </div>
+  </div>
+
+  <!-- FILTER -->
+  <div style="margin-bottom:16px;">
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:8px;">Filter:</div>
+    <div class="filter-row" id="scope-filter-row"></div>
+  </div>
+
+  <!-- LIST SCOPES -->
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>ID</th><th>Scope</th><th>Item</th><th>Batch</th><th>Owner</th><th>Status</th><th></th></tr></thead>
+      <tbody id="scopes-list-body"></tbody>
+    </table>
   </div>
 </div>
 
@@ -495,6 +552,10 @@ async function autoGenerateMissingWeeklyRows() {
   
   for (const scope of DB.scopes) {
     if (!existingIds.has(String(scope.id))) {
+      // Check one more time di local DB before adding
+      const alreadyExists = DB.weekly.some(r => r.week_id === wid && String(r.scope_id) === String(scope.id));
+      if (alreadyExists) continue; // Skip if somehow already in DB
+      
       // Add to local DB
       DB.weekly.push({
         week_id: wid,
@@ -505,16 +566,18 @@ async function autoGenerateMissingWeeklyRows() {
         updated_at: now,
         updated_by: 'auto'
       });
-      // Push ke Sheets
-      await gasPost({
-        action: 'setWeeklyStatus',
-        scope_id: scope.id,
-        week_id: wid,
-        status: 'todo',
-        progress_pct: 0,
-        note: '',
-        updated_by: 'auto'
-      });
+      // Push ke Sheets (dengan debounce untuk avoid rate limit)
+      setTimeout(() => {
+        gasPost({
+          action: 'setWeeklyStatus',
+          scope_id: scope.id,
+          week_id: wid,
+          status: 'todo',
+          progress_pct: 0,
+          note: '',
+          updated_by: 'auto'
+        });
+      }, added * 100);
       added++;
     }
   }
@@ -621,6 +684,7 @@ document.querySelectorAll('.nav-tab').forEach(b => b.addEventListener('click', (
   document.getElementById('tab-' + b.dataset.tab).classList.add('active');
   if (b.dataset.tab === 'rice') renderRice();
   if (b.dataset.tab === 'okr') renderOkr();
+  if (b.dataset.tab === 'scopes') renderScopes();
   if (b.dataset.tab === 'weekly') renderWeeklyLog();
   if (b.dataset.tab === 'progress') renderProgress();
 }));
@@ -1047,6 +1111,97 @@ function onSaranChange(scopeId, val) {
 }
 
 // ══════════════════════════════════════════════════════
+//  SCOPES MANAGEMENT
+// ══════════════════════════════════════════════════════
+let scopesFilter = { owner: 'all', batch: 'all' };
+
+function renderScopes() {
+  const filters = ['all', ...new Set(DB.scopes.map(s => s.owner).filter(Boolean)), '—', 'SC-3', 'SC-4'];
+  document.getElementById('scope-filter-row').innerHTML = filters.map(f => {
+    if (f === '—') return '<div style="height:2px;background:var(--line);width:100%;margin:8px 0"></div>';
+    let active = false, isOwner = false, isBatch = false;
+    if (f === 'all') active = scopesFilter.owner === 'all' && scopesFilter.batch === 'all';
+    else if (f === 'SC-3' || f === 'SC-4') { active = scopesFilter.batch === f; isBatch = true; }
+    else { active = scopesFilter.owner === f; isOwner = true; }
+    const label = f === 'all' ? 'All' : f;
+    return `<div class="fchip${active ? ' on' : ''}" onclick="setScopesFilter('${f}')">${label}</div>`;
+  }).join('');
+
+  let filtered = DB.scopes;
+  if (scopesFilter.owner !== 'all') filtered = filtered.filter(s => s.owner === scopesFilter.owner);
+  if (scopesFilter.batch !== 'all') filtered = filtered.filter(s => String(s.batch) === scopesFilter.batch);
+
+  document.getElementById('scopes-list-body').innerHTML = filtered.length ? filtered.map((s, i) => {
+    const bCls = String(s.batch) === 'SC-3' ? 'b-sc3' : 'b-sc4';
+    const statusBadge = String(s.active).toLowerCase() === 'false' ? '<span style="color:var(--ink3);font-size:11px">INACTIVE</span>' : '<span style="color:var(--ok);font-size:11px;font-weight:600">ACTIVE</span>';
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)">${i+1}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--red)">${s.id}</td>
+      <td class="td-scope">${s.scope || ''}</td>
+      <td class="td-item">${s.item || ''}</td>
+      <td class="td-batch"><span class="${bCls}">${s.batch}</span></td>
+      <td class="td-owner" style="font-family:'JetBrains Mono',monospace;font-size:10px">${s.owner || ''}</td>
+      <td>${statusBadge}</td>
+      <td style="text-align:center"><button class="btn-danger" onclick="deleteScope('${s.id}')">✕</button></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--ink3);font-size:13px">No scopes</td></tr>';
+}
+
+function setScopesFilter(f) {
+  if (f === 'all') { scopesFilter.owner = 'all'; scopesFilter.batch = 'all'; }
+  else if (f === 'SC-3' || f === 'SC-4') { scopesFilter.batch = f; }
+  else { scopesFilter.owner = f; scopesFilter.batch = 'all'; }
+  renderScopes();
+}
+
+async function addNewScope() {
+  const id = document.getElementById('add-scope-id').value.trim();
+  const name = document.getElementById('add-scope-name').value.trim();
+  const item = document.getElementById('add-scope-item').value.trim();
+  const batch = document.getElementById('add-scope-batch').value;
+  const owner = document.getElementById('add-scope-owner').value;
+
+  if (!id || !name || !item) { toast('Semua field harus diisi!', 'err'); return; }
+
+  // Add to local DB
+  DB.scopes.push({ id, batch, item, scope: name, owner, active: true });
+  saveLocal();
+
+  // Push ke Sheets
+  if (GAS_URL) {
+    await gasPost({
+      action: 'addScope',
+      id, batch, item, scope: name, owner, active: true
+    });
+  }
+
+  // Clear form
+  document.getElementById('add-scope-id').value = '';
+  document.getElementById('add-scope-name').value = '';
+  document.getElementById('add-scope-item').value = '';
+  
+  renderScopes();
+  toast('Scope added: ' + name, 'ok');
+}
+
+async function deleteScope(scopeId) {
+  const scope = DB.scopes.find(s => s.id === scopeId);
+  if (!confirm(`Delete "${scope.scope}" permanently?`)) return;
+
+  // Remove from local DB
+  DB.scopes = DB.scopes.filter(s => s.id !== scopeId);
+  saveLocal();
+
+  // Delete from Sheets
+  if (GAS_URL) {
+    await gasPost({ action: 'deleteScope', id: scopeId });
+  }
+
+  renderScopes();
+  toast('Scope deleted', 'ok');
+}
+
+// ══════════════════════════════════════════════════════
 //  TOAST & REFRESH
 // ══════════════════════════════════════════════════════
 function toast(msg, type = 'info') {
@@ -1070,6 +1225,7 @@ function renderAll() {
   // But re-render if tab is already active
   if (document.getElementById('tab-okr').classList.contains('active')) renderOkr();
   if (document.getElementById('tab-rice').classList.contains('active')) renderRice();
+  if (document.getElementById('tab-scopes').classList.contains('active')) renderScopes();
 }
 
 // ══════════════════════════════════════════════════════
