@@ -455,6 +455,7 @@ td{padding:9px 12px;vertical-align:middle;}
     <b>Effort</b> = orang-bulan (isi bareng Zulfahmi) &nbsp;·&nbsp;
     RICE = (R × I × C%) / Effort — <b>auto-hitung</b>. Saran bisa diedit langsung.
   </div>
+  <div class="filter-row" id="rice-filter-row" style="margin-bottom:16px;"></div>
   <div id="rice-container">
     <div class="loading"><div class="spin"></div>Loading RICE data...</div>
   </div>
@@ -1030,12 +1031,23 @@ function calcRice(r) {
   return { nilai: Math.round(nilai * 10) / 10, rice: Math.round(nilai / effort * 10) / 10 };
 }
 
+let riceOwnerFilter = 'all';
+
 function renderRice() {
-  const scopes = DB.scopes;
-  if (!scopes.length) {
+  const allScopes = DB.scopes;
+  if (!allScopes.length) {
     document.getElementById('rice-container').innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Belum ada data scope</div><div class="empty-sub">Hubungkan ke Sheets dan run setup</div></div>';
     return;
   }
+
+  // Render owner filter chips
+  const owners = ['all', ...new Set(allScopes.map(s => s.owner).filter(Boolean))];
+  document.getElementById('rice-filter-row').innerHTML = owners.map(o =>
+    `<div class="fchip${riceOwnerFilter === o ? ' on' : ''}" onclick="setRiceOwnerFilter('${o}')">${o === 'all' ? 'Semua Owner' : o}</div>`
+  ).join('');
+
+  // Apply filter
+  const scopes = riceOwnerFilter === 'all' ? allScopes : allScopes.filter(s => s.owner === riceOwnerFilter);
 
   const batches = ['SC-3','SC-4'];
   const html = batches.map(batch => {
@@ -1049,10 +1061,17 @@ function renderRice() {
       const saran = rd.saran || '';
       const bCls = batch === 'SC-3' ? 'b-sc3' : 'b-sc4';
       const get = k => rd[k] !== undefined && rd[k] !== '' ? rd[k] : '';
+      const owner = s.owner || '';
+      const ownerStyle = owner === 'Fathan'
+        ? 'background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;'
+        : owner === 'Temmy'
+        ? 'background:#FFF7ED;color:#C2410C;border-color:#FED7AA;'
+        : '';
       return `<tr>
         <td class="td-scope-r">${s.scope || ''}</td>
         <td class="td-item-r">${s.item || ''}</td>
         <td class="td-batch"><span class="${bCls}">${batch}</span></td>
+        <td><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid;${ownerStyle}">${owner}</span></td>
         <td><input class="rice-inp" type="number" min="0" step="1"    value="${get('reach')}"    placeholder="—" onchange="onRiceChange('${s.id}','reach',this.value)"></td>
         <td><input class="rice-inp" type="number" min="0.25" max="3" step="0.25" value="${get('impact')}"   placeholder="—" onchange="onRiceChange('${s.id}','impact',this.value)"></td>
         <td><input class="rice-inp" type="number" min="0" max="100" step="10"  value="${get('conf_pct')}" placeholder="—" onchange="onRiceChange('${s.id}','conf_pct',this.value)"></td>
@@ -1072,16 +1091,22 @@ function renderRice() {
         <span style="font-size:14px;font-weight:700;color:var(--ink)">${batch} Features</span>
         <span class="badge ${bCls2}">${batch}</span>
         <span style="font-size:11px;color:var(--ink3)">Deadline: ${deadline}</span>
+        <span style="font-size:11px;color:var(--ink3);margin-left:auto">${bs.length} scopes</span>
       </div>
       <div class="tbl-wrap">
         <table class="rice-tbl">
-          <thead><tr><th>Scope</th><th>Item</th><th>Batch</th><th>Reach</th><th>Impact</th><th>Conf %</th><th>Nilai</th><th>Effort</th><th>RICE</th><th>Saran (editable)</th></tr></thead>
+          <thead><tr><th>Scope</th><th>Item</th><th>Batch</th><th>Owner</th><th>Reach</th><th>Impact</th><th>Conf %</th><th>Nilai</th><th>Effort</th><th>RICE</th><th>Saran (editable)</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>`;
   }).join('');
 
-  document.getElementById('rice-container').innerHTML = html;
+  document.getElementById('rice-container').innerHTML = html || '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Tidak ada scope untuk owner ini</div></div>';
+}
+
+function setRiceOwnerFilter(owner) {
+  riceOwnerFilter = owner;
+  renderRice();
 }
 
 function onRiceChange(scopeId, field, val) {
