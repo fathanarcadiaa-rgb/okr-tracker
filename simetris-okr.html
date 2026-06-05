@@ -296,9 +296,9 @@ td{padding:9px 12px;vertical-align:middle;}
       </div>
     </div>
     <div class="header-meta">
-      <span class="chip">SC-3: 23 Jul 2026</span>
-      <span class="chip">SC-4: 27 Agt 2026</span>
-      <span class="chip red">App Release: 30 Jun 2026</span>
+      <span class="chip" id="hdr-sc3"></span>
+      <span class="chip" id="hdr-sc4"></span>
+      <span class="chip red" id="hdr-release"></span>
       <span class="chip ok" id="today-chip"></span>
       <span class="chip sync" id="sync-chip"><span class="sync-dot syncing" id="sync-dot"></span><span id="sync-lbl">Connecting...</span></span>
     </div>
@@ -469,6 +469,16 @@ td{padding:9px 12px;vertical-align:middle;}
 // ══════════════════════════════════════════════════════
 //  CONFIG & STATE
 // ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+//  ⚙️  CONFIG — Edit jadwal di sini
+// ══════════════════════════════════════════════════════
+const CFG = {
+  appRelease:  { label: 'App Release', date: '2026-06-30', display: '30 Jun 2026' },
+  showcase3:   { label: 'Showcase 3 (SC-3)', date: '2026-07-23', display: '23 Jul 2026' },
+  showcase4:   { label: 'Showcase 4 (SC-4)', date: '2026-08-27', display: '27 Agt 2026' },
+};
+// ══════════════════════════════════════════════════════
+
 let GAS_URL = localStorage.getItem('simetris_gas_v4') || '';
 let DB = { scopes:[], rice:[], weekly:[], okr:[], kr_weekly:[] };
 let weekOffset = 0;
@@ -697,12 +707,21 @@ function renderTimeline() {
   const now = new Date();
   const du = t => { const d = Math.round((new Date(t) - now) / 86400000); return d <= 0 ? 'LEWAT' : d + ' hari'; };
   const fmt = d => d.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short' });
+
+  // Update header chips
+  const sc3El = document.getElementById('hdr-sc3');
+  const sc4El = document.getElementById('hdr-sc4');
+  const relEl = document.getElementById('hdr-release');
+  if (sc3El) sc3El.textContent = 'SC-3: ' + CFG.showcase3.display;
+  if (sc4El) sc4El.textContent = 'SC-4: ' + CFG.showcase4.display;
+  if (relEl) relEl.textContent = CFG.appRelease.label + ': ' + CFG.appRelease.display;
+
   document.getElementById('today-chip').textContent = fmt(now);
   document.getElementById('tl-strip').innerHTML = `
     <div class="tl-cell"><div class="tl-label">Hari Ini</div><div class="tl-val" style="font-size:15px;color:var(--ink)">${fmt(now)}</div></div>
-    <div class="tl-cell"><div class="tl-label">App Release</div><div class="tl-val warn">30 Jun 2026</div><div class="tl-sub"><b>${du('2026-06-30')}</b> lagi</div></div>
-    <div class="tl-cell"><div class="tl-label">Showcase 3</div><div class="tl-val red">23 Jul 2026</div><div class="tl-sub"><b>${du('2026-07-23')}</b> lagi</div></div>
-    <div class="tl-cell"><div class="tl-label">Showcase 4</div><div class="tl-val info">27 Agt 2026</div><div class="tl-sub"><b>${du('2026-08-27')}</b> lagi</div></div>`;
+    <div class="tl-cell"><div class="tl-label">${CFG.appRelease.label}</div><div class="tl-val warn">${CFG.appRelease.display}</div><div class="tl-sub"><b>${du(CFG.appRelease.date)}</b> lagi</div></div>
+    <div class="tl-cell"><div class="tl-label">${CFG.showcase3.label}</div><div class="tl-val red">${CFG.showcase3.display}</div><div class="tl-sub"><b>${du(CFG.showcase3.date)}</b> lagi</div></div>
+    <div class="tl-cell"><div class="tl-label">${CFG.showcase4.label}</div><div class="tl-val info">${CFG.showcase4.display}</div><div class="tl-sub"><b>${du(CFG.showcase4.date)}</b> lagi</div></div>`;
 }
 
 // ══════════════════════════════════════════════════════
@@ -1085,7 +1104,7 @@ function renderRice() {
     }).join('');
 
     const bCls2 = batch === 'SC-3' ? 'badge-sc3' : 'badge-sc4';
-    const deadline = batch === 'SC-3' ? '23 Jul 2026' : '27 Agt 2026';
+    const deadline = batch === 'SC-3' ? CFG.showcase3.display : CFG.showcase4.display;
     return `
       <div style="display:flex;gap:10px;align-items:center;margin:24px 0 10px;padding-bottom:8px;border-bottom:2px solid var(--red)">
         <span style="font-size:14px;font-weight:700;color:var(--ink)">${batch} Features</span>
@@ -1187,43 +1206,57 @@ async function addNewScope() {
   const owner = document.getElementById('add-scope-owner').value;
 
   if (!id || !name || !item) { toast('Semua field harus diisi!', 'err'); return; }
+  if (DB.scopes.find(s => s.id === id)) { toast('ID sudah ada!', 'err'); return; }
 
-  // Add to local DB
+  const now = new Date().toISOString();
+
+  // Add to local DB — scopes + rice (empty entry)
   DB.scopes.push({ id, batch, item, scope: name, owner, active: true });
+  DB.rice.push({ scope_id: id, reach: '', impact: '', conf_pct: '', effort: '', rice_score: '', saran: '', updated_at: now });
   saveLocal();
 
-  // Push ke Sheets
+  // Push ke Sheets (parallel)
   if (GAS_URL) {
-    await gasPost({
-      action: 'addScope',
-      id, batch, item, scope: name, owner, active: true
-    });
+    await Promise.all([
+      gasPost({ action: 'addScope', id, batch, item, scope: name, owner, active: true }),
+      gasPost({ action: 'addRiceEntry', scope_id: id, updated_at: now }),
+    ]);
   }
 
   // Clear form
   document.getElementById('add-scope-id').value = '';
   document.getElementById('add-scope-name').value = '';
   document.getElementById('add-scope-item').value = '';
-  
+
   renderScopes();
-  toast('Scope added: ' + name, 'ok');
+  if (document.getElementById('tab-rice').classList.contains('active')) renderRice();
+  toast('Scope + RICE entry added: ' + name, 'ok');
 }
 
 async function deleteScope(scopeId) {
   const scope = DB.scopes.find(s => s.id === scopeId);
-  if (!confirm(`Delete "${scope.scope}" permanently?`)) return;
+  if (!confirm(`Delete "${scope.scope}" permanently?\n\nIni juga akan hapus data RICE dan semua weekly log untuk scope ini.`)) return;
 
-  // Remove from local DB
-  DB.scopes = DB.scopes.filter(s => s.id !== scopeId);
+  // Remove from local DB — scopes, rice, weekly log
+  DB.scopes  = DB.scopes.filter(s => s.id !== scopeId);
+  DB.rice    = DB.rice.filter(r => String(r.scope_id) !== String(scopeId));
+  DB.weekly  = DB.weekly.filter(r => String(r.scope_id) !== String(scopeId));
   saveLocal();
 
-  // Delete from Sheets
+  // Delete from Sheets (parallel)
   if (GAS_URL) {
-    await gasPost({ action: 'deleteScope', id: scopeId });
+    await Promise.all([
+      gasPost({ action: 'deleteScope', id: scopeId }),
+      gasPost({ action: 'deleteRiceEntry', scope_id: scopeId }),
+      gasPost({ action: 'deleteWeeklyByScope', scope_id: scopeId }),
+    ]);
   }
 
   renderScopes();
-  toast('Scope deleted', 'ok');
+  renderProgress();
+  renderWeeklyLog();
+  if (document.getElementById('tab-rice').classList.contains('active')) renderRice();
+  toast('Scope + RICE + weekly log deleted', 'ok');
 }
 
 // ══════════════════════════════════════════════════════
