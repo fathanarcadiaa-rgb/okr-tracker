@@ -209,23 +209,47 @@ td{padding:9px 12px;vertical-align:middle;}
 .kr-unit{font-size:11px;color:var(--ink3);white-space:nowrap;}
 .kr-target{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);white-space:nowrap;}
 
-/* ── RICE TABLE ── */
-.rice-guide{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--ink2);line-height:1.7;}
+/* ── RICE TABLE (v2 — grouped like PM spreadsheet) ── */
+.rice-guide{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--ink2);line-height:1.7;}
 .rice-guide b{color:var(--ink);}
-.rice-tbl td{padding:8px 10px;vertical-align:middle;}
-.rice-tbl .td-scope-r{font-weight:600;color:var(--ink);min-width:180px;}
-.rice-tbl .td-item-r{color:var(--ink3);font-size:11px;min-width:110px;}
-.rice-inp{width:58px;background:var(--bg2);border:1.5px solid var(--line);border-radius:5px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12px;padding:4px 6px;text-align:center;outline:none;transition:border-color .15s;}
+.rice-inp{width:54px;background:var(--bg2);border:1.5px solid var(--line);border-radius:5px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12px;padding:4px 6px;text-align:center;outline:none;transition:border-color .15s;}
 .rice-inp:focus{border-color:var(--red);}
-.td-nilai{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;text-align:center;color:var(--ink);}
-.td-rice-final{text-align:center;}
-.rank{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;}
-.r-high{background:var(--ok-bg);color:var(--ok);}
-.r-mid{background:var(--warn-bg);color:var(--warn);}
-.r-low{background:var(--danger-bg);color:var(--danger);}
-.r-zero{background:var(--bg3);color:var(--ink3);}
-.saran-ta{width:200px;background:var(--bg2);border:1.5px solid var(--line);border-radius:5px;color:var(--ink2);font-family:'Sora',sans-serif;font-size:11px;padding:5px 7px;resize:vertical;outline:none;transition:border-color .15s;min-height:34px;line-height:1.4;}
+.saran-ta{width:160px;background:var(--bg2);border:1.5px solid var(--line);border-radius:5px;color:var(--ink2);font-family:'Sora',sans-serif;font-size:11px;padding:5px 7px;resize:vertical;outline:none;transition:border-color .15s;min-height:32px;line-height:1.4;}
 .saran-ta:focus{border-color:var(--red);}
+/* Grouped rice table */
+.rice-main-tbl{width:100%;border-collapse:collapse;font-size:11.5px;background:#fff;}
+.rice-main-tbl thead th{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:#fff;padding:9px 10px;border:1px solid rgba(255,255,255,.2);text-align:center;white-space:pre-line;line-height:1.3;}
+.rice-main-tbl thead tr:first-child th{background:#1C2833;}
+.rice-main-tbl tbody tr:hover td{filter:brightness(.97);}
+.rice-main-tbl tbody td{padding:7px 10px;border:1px solid var(--line);vertical-align:middle;}
+/* Group cells (merged) */
+.td-group{vertical-align:top!important;padding:10px!important;background:#F8F9FA;}
+.td-group-no{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);width:28px;}
+.td-item-grp{font-weight:700;font-size:12px;color:var(--ink);min-width:100px;}
+.td-owner-grp{text-align:center;min-width:70px;}
+.td-stakeholder{font-size:11px;color:#444;line-height:1.5;min-width:160px;max-width:220px;}
+.td-userneed{font-size:10.5px;color:var(--ink2);line-height:1.5;min-width:200px;max-width:280px;}
+.td-okrkr{font-size:10.5px;color:var(--info);font-weight:600;line-height:1.6;min-width:130px;}
+/* Editable group cells */
+[contenteditable]{outline:none;cursor:text;border-radius:4px;transition:background .15s;}
+[contenteditable]:hover{background:rgba(208,0,27,.04);}
+[contenteditable]:focus{background:rgba(208,0,27,.06);outline:1px dashed var(--red-border);}
+/* Scope column */
+.td-scope-name{font-weight:600;color:var(--ink);min-width:160px;}
+/* Nilai Bisnis coloring */
+.nilai-cell{text-align:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;min-width:60px;}
+.nilai-high{background:#D5F5E3;color:#1A7245;}
+.nilai-mid{background:#FDEBD0;color:#935116;}
+.nilai-low{background:#FEF9E7;color:#7D6608;}
+.nilai-zero{background:var(--bg2);color:var(--ink3);}
+/* RICE Final */
+.rice-final-cell{text-align:center;min-width:68px;}
+.rf-high{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#1A5276;background:#D6EAF8;padding:3px 8px;border-radius:6px;display:inline-block;}
+.rf-mid{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#784212;background:#FAE5D3;padding:3px 8px;border-radius:6px;display:inline-block;}
+.rf-low{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#6E2F1A;background:#FDEDEC;padding:3px 8px;border-radius:6px;display:inline-block;}
+.rf-na{font-size:11px;color:var(--ink3);font-style:italic;}
+/* Batch group divider */
+.batch-divider{height:4px;background:linear-gradient(90deg,var(--red),transparent);}
 
 /* ── EMPTY STATE ── */
 .empty{text-align:center;padding:48px 24px;color:var(--ink3);}
@@ -473,7 +497,7 @@ td{padding:9px 12px;vertical-align:middle;}
 //  ⚙️  CONFIG — Edit jadwal di sini
 // ══════════════════════════════════════════════════════
 const CFG = {
-  appRelease:  { label: 'App Release', date: '2026-08-31', display: '31 Agu 2026' },
+  appRelease:  { label: 'App Release', date: '2026-06-30', display: '30 Jun 2026' },
   showcase3:   { label: 'Showcase 3 (SC-3)', date: '2026-07-23', display: '23 Jul 2026' },
   showcase4:   { label: 'Showcase 4 (SC-4)', date: '2026-08-27', display: '27 Agt 2026' },
 };
@@ -1052,6 +1076,54 @@ function calcRice(r) {
 
 let riceOwnerFilter = 'all';
 
+// ── ITEM-LEVEL METADATA (editable in web, stored to localStorage) ──
+const ITEM_META_DEFAULT = {
+  'APK Form':              { stakeholder:'Tim kredit: butuh form aplikasi + KYC sebelum survey.', user_need:'Konsumen mau pengajuannya diproses & dinilai layak sekali jalan; data tervalidasi otomatis tanpa bolak-balik.', okr_kr:'Q3: disbursement ≤14hr\nLive MVP SC-3' },
+  'Stepper Status':        { stakeholder:'Bisnis: konsumen harus bisa lihat status pengajuan real-time.', user_need:'Visit Progress drop 37.8%→18.0% di Maret (−19.8pp). Agent kehilangan follow-up momentum karena tidak ada status update. Stepper real-time mendukung SLA disbursement ≤14 hari.', okr_kr:'KR O4K2: Stepper real-time\nKR O1: disbursement ≤14hr' },
+  'Kontrak':               { stakeholder:'Legal/Ops: kontrak, TTD & pembayaran harus digital.', user_need:'Konsumen ingin proses branchless end-to-end tanpa harus ke cabang. Kontrak digital + e-sign = syarat terakhir paperless disbursement.', okr_kr:'KR O1: disbursement ≤14hr\nBranchless MVP end-to-end' },
+  'Simulasi Kredit Agent': { stakeholder:'Sales: agent harus bisa input pengajuan konsumen — selama ini lewat TM/cabang manual.', user_need:'679 agent kontributif Jan 2026 submit via jalur manual. Avg drawdown 92–185 Juta/agent/bln. Tanpa Order Form Agent, zero drawdown digital. FR aktual 26–37% jadi acuan C% fitur CGC.', okr_kr:'KR O2: 10 pengajuan/bln\nKR O2K2: 15 konsumen CGC\nKR O2K3: Order Form live' },
+  'Prospek Aplikasi':      { stakeholder:'Sales: agent minta bisa pantau prospek & submission-nya secara real-time.', user_need:'84–93% agent eligible tidak konversi ke drawdown tiap bulan. Visit Progress drop 37.8%→18.0% di Maret. Tanpa List Prospek + Status Survey, agent tidak tahu harus follow-up siapa dan kapan.', okr_kr:'KR O4K1: Prospek SC-3 100%\nKR O4K2: Survey ≤24 jam' },
+  'Profile Staff Agent':   { stakeholder:'Agent besar: minta bisa kelola staff/tim mereka.', user_need:'Hanya relevan agent berbadan usaha banyak staff — di pilot 30 agent belum ada user tipe ini. Business rule role hierarchy & data isolation belum terdefinisi. Semua KR pilot bisa dicapai tanpa fitur ini.', okr_kr:'(Tidak memetakan ke OKR pilot)\nKandidat post-launch / Phase 2' },
+  'Modul Belajar':         { stakeholder:'Markom/Training: agent perlu materi belajar in-app untuk tingkatkan kompetensi produk.', user_need:'Register MTD 901–2.272 agent baru/bln, tapi konversi ke kontributif hanya 8.8–15%. Knowledge gap adalah barrier utama produktivitas agent baru.', okr_kr:'KR O3K1: Modul Belajar live' },
+  'Bahan Promosi':         { stakeholder:'Markom: agent perlu materi promosi siap pakai di lapangan.', user_need:'% Visit Progress hanya 18–32.7%/bln. BOOSSI+EXPRESI (163–212/bln) paling aktif approach market — butuh materi standar sebagai tools lapangan.', okr_kr:'KR O3K1: Bahan Promosi live\nDukung target 15 konsumen CGC' },
+  'Bonus Saya':            { stakeholder:'Sales: agent mau lihat bonus mereka langsung di app — transparan dan real-time.', user_need:'Agent Kontributif turun 44.6% (679→376) dalam 5 bln, avg drawdown/kontrib naik 2x (92→185 Juta). Retention crisis: agent keluar karena tidak ada visibility real-time terhadap hasil kerja mereka.', okr_kr:'KR O3K2: Bonus & Target live\nTarget retensi agent aktif' },
+  'Target Performa':       { stakeholder:'Sales: agent perlu lihat target & pencapaian mereka.', user_need:'% to LB konsisten di bawah 70% (max 66.6%). Top 50 Platinum Feb–Apr = 4–6x avg drawdown kontrib. Platinum Mei kolaps 64→8 agent → drawdown Platinum 36.8→7.8 Miliar.', okr_kr:'KR O3K2: Target & Performa live\nKR O3K3: Level Agent live' },
+};
+
+function getItemMeta(item) {
+  const saved = JSON.parse(localStorage.getItem('simetris_item_meta') || '{}');
+  return Object.assign({}, ITEM_META_DEFAULT[item] || {}, saved[item] || {});
+}
+function saveItemMeta(item, field, val) {
+  const saved = JSON.parse(localStorage.getItem('simetris_item_meta') || '{}');
+  if (!saved[item]) saved[item] = {};
+  saved[item][field] = val;
+  localStorage.setItem('simetris_item_meta', JSON.stringify(saved));
+}
+
+function getNilaiBisnis(rd) {
+  const r = parseFloat(rd.reach) || 0;
+  const i = parseFloat(rd.impact) || 0;
+  const c = parseFloat(rd.conf_pct) || 0;
+  const e = parseFloat(rd.effort) || 0;
+  const nilai = Math.round(r * i * (c/100) * 10) / 10;
+  const rice  = e > 0 ? Math.round(nilai / e * 10) / 10 : null;
+  return { nilai, rice };
+}
+
+function nilaiClass(nilai) {
+  if (nilai >= 100) return 'nilai-high';
+  if (nilai >= 50)  return 'nilai-mid';
+  if (nilai > 0)    return 'nilai-low';
+  return 'nilai-zero';
+}
+function riceClass(rice) {
+  if (!rice) return '';
+  if (rice >= 50) return 'rf-high';
+  if (rice >= 20) return 'rf-mid';
+  return 'rf-low';
+}
+
 function renderRice() {
   const allScopes = DB.scopes;
   if (!allScopes.length) {
@@ -1059,68 +1131,126 @@ function renderRice() {
     return;
   }
 
-  // Render owner filter chips
+  // Owner filter chips
   const owners = ['all', ...new Set(allScopes.map(s => s.owner).filter(Boolean))];
   document.getElementById('rice-filter-row').innerHTML = owners.map(o =>
     `<div class="fchip${riceOwnerFilter === o ? ' on' : ''}" onclick="setRiceOwnerFilter('${o}')">${o === 'all' ? 'Semua Owner' : o}</div>`
   ).join('');
 
-  // Apply filter
   const scopes = riceOwnerFilter === 'all' ? allScopes : allScopes.filter(s => s.owner === riceOwnerFilter);
 
-  const batches = ['SC-3','SC-4'];
-  const html = batches.map(batch => {
-    const bs = scopes.filter(s => String(s.batch) === batch);
-    if (!bs.length) return '';
-    const rows = bs.map(s => {
-      const rd = DB.rice.find(r => String(r.scope_id) === String(s.id)) || {};
-      const { nilai, rice } = calcRice(rd);
-      const rnk = rice >= 20 ? 'HIGH' : rice >= 8 ? 'MID' : rice > 0 ? 'LOW' : 'ZERO';
-      const rnkCls = rice >= 20 ? 'r-high' : rice >= 8 ? 'r-mid' : rice > 0 ? 'r-low' : 'r-zero';
-      const saran = rd.saran || '';
+  const thead = `<thead><tr>
+    <th style="width:28px">No</th>
+    <th style="width:54px">Batch</th>
+    <th style="width:100px">Item</th>
+    <th style="width:68px">Owner</th>
+    <th style="width:190px">Suara Stakeholder</th>
+    <th style="width:240px">Kebutuhan User\n(Analisa + Bukti Data)</th>
+    <th style="width:140px">OKR / KR\nDidukung</th>
+    <th style="width:170px">Scope (Sub-fitur)</th>
+    <th style="width:54px">Reach\n(peng./\nbln)</th>
+    <th style="width:58px">Impact\n(0.25–3)</th>
+    <th style="width:54px">Conf\n(%)</th>
+    <th style="width:68px">NILAI\nBISNIS\n(R×I×C)</th>
+    <th style="width:62px">Effort\n(p-mo)\nTech Lead</th>
+    <th style="width:68px">RICE\nFinal</th>
+    <th style="width:160px">Saran (editable)</th>
+  </tr></thead>`;
+
+  // Group scopes by batch then item
+  const batches = ['SC-3', 'SC-4'];
+  let rowNo = 0;
+  let tbodyHtml = '';
+
+  batches.forEach(batch => {
+    const batchScopes = scopes.filter(s => String(s.batch) === batch);
+    if (!batchScopes.length) return;
+
+    // Batch separator row
+    tbodyHtml += `<tr><td colspan="15" class="batch-divider" style="padding:0!important;"></td></tr>
+    <tr><td colspan="15" style="background:#1C2833;padding:6px 12px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fff;">${batch} Features</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.5);margin-left:10px;">Deadline: ${batch === 'SC-3' ? CFG.showcase3.display : CFG.showcase4.display}</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.5);margin-left:10px;">${batchScopes.length} scopes</span>
+    </td></tr>`;
+
+    // Group by item
+    const items = [...new Set(batchScopes.map(s => s.item).filter(Boolean))];
+    items.forEach(item => {
+      const itemScopes = batchScopes.filter(s => s.item === item);
+      const n = itemScopes.length;
+      const meta = getItemMeta(item);
       const bCls = batch === 'SC-3' ? 'b-sc3' : 'b-sc4';
-      const get = k => rd[k] !== undefined && rd[k] !== '' ? rd[k] : '';
-      const owner = s.owner || '';
-      const ownerStyle = owner === 'Fathan'
+      const ownerVal = itemScopes[0]?.owner || '';
+      const ownerStyle = ownerVal === 'Fathan'
         ? 'background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;'
-        : owner === 'Temmy'
+        : ownerVal === 'Temmy'
         ? 'background:#FFF7ED;color:#C2410C;border-color:#FED7AA;'
         : '';
-      return `<tr>
-        <td class="td-scope-r">${s.scope || ''}</td>
-        <td class="td-item-r">${s.item || ''}</td>
-        <td class="td-batch"><span class="${bCls}">${batch}</span></td>
-        <td><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid;${ownerStyle}">${owner}</span></td>
-        <td><input class="rice-inp" type="number" min="0" step="1"    value="${get('reach')}"    placeholder="—" onchange="onRiceChange('${s.id}','reach',this.value)"></td>
-        <td><input class="rice-inp" type="number" min="0.25" max="3" step="0.25" value="${get('impact')}"   placeholder="—" onchange="onRiceChange('${s.id}','impact',this.value)"></td>
-        <td><input class="rice-inp" type="number" min="0" max="100" step="10"  value="${get('conf_pct')}" placeholder="—" onchange="onRiceChange('${s.id}','conf_pct',this.value)"></td>
-        <td class="td-nilai" id="nv-${s.id}">${nilai || '—'}</td>
-        <td><input class="rice-inp" type="number" min="0.1" step="0.1" value="${get('effort')}"   placeholder="—" onchange="onRiceChange('${s.id}','effort',this.value)"></td>
-        <td class="td-rice-final" id="rv-${s.id}">
-          ${rice > 0 ? `<span class="rank ${rnkCls}">${rnk}</span><br><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">${rice}</span>` : '<span style="color:var(--ink3)">—</span>'}
-        </td>
-        <td><textarea class="saran-ta" rows="2" onchange="onSaranChange('${s.id}',this.value)">${saran}</textarea></td>
-      </tr>`;
-    }).join('');
 
-    const bCls2 = batch === 'SC-3' ? 'badge-sc3' : 'badge-sc4';
-    const deadline = batch === 'SC-3' ? CFG.showcase3.display : CFG.showcase4.display;
-    return `
-      <div style="display:flex;gap:10px;align-items:center;margin:24px 0 10px;padding-bottom:8px;border-bottom:2px solid var(--red)">
-        <span style="font-size:14px;font-weight:700;color:var(--ink)">${batch} Features</span>
-        <span class="badge ${bCls2}">${batch}</span>
-        <span style="font-size:11px;color:var(--ink3)">Deadline: ${deadline}</span>
-        <span style="font-size:11px;color:var(--ink3);margin-left:auto">${bs.length} scopes</span>
-      </div>
-      <div class="tbl-wrap">
-        <table class="rice-tbl">
-          <thead><tr><th>Scope</th><th>Item</th><th>Batch</th><th>Owner</th><th>Reach</th><th>Impact</th><th>Conf %</th><th>Nilai</th><th>Effort</th><th>RICE</th><th>Saran (editable)</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
-  }).join('');
+      itemScopes.forEach((s, si) => {
+        rowNo++;
+        const rd = DB.rice.find(r => String(r.scope_id) === String(s.id)) || {};
+        const { nilai, rice } = getNilaiBisnis(rd);
+        const get = k => (rd[k] !== undefined && rd[k] !== '') ? rd[k] : '';
+        const nCls = nilaiClass(nilai);
+        const rCls = riceClass(rice);
+        const saranVal = rd.saran || '';
 
-  document.getElementById('rice-container').innerHTML = html || '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Tidak ada scope untuk owner ini</div></div>';
+        if (si === 0) {
+          // First row of group: include merged group cells
+          tbodyHtml += `<tr>
+            <td class="td-group-no">${rowNo}</td>
+            <td class="td-group" rowspan="${n}" style="text-align:center;min-width:52px;">
+              <span class="${bCls}" style="font-size:10px;">${batch}</span>
+            </td>
+            <td class="td-group td-item-grp" rowspan="${n}">${item}</td>
+            <td class="td-group" rowspan="${n}" style="text-align:center;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid;${ownerStyle}">${ownerVal}</span>
+            </td>
+            <td class="td-group td-stakeholder" rowspan="${n}">
+              <div contenteditable="true" onblur="saveItemMeta('${item}','stakeholder',this.innerText)">${meta.stakeholder || ''}</div>
+            </td>
+            <td class="td-group td-userneed" rowspan="${n}">
+              <div contenteditable="true" onblur="saveItemMeta('${item}','user_need',this.innerText)">${meta.user_need || ''}</div>
+            </td>
+            <td class="td-group td-okrkr" rowspan="${n}">
+              <div contenteditable="true" onblur="saveItemMeta('${item}','okr_kr',this.innerText)" style="white-space:pre-line">${meta.okr_kr || ''}</div>
+            </td>
+            <td class="td-scope-name">${s.scope || ''}</td>
+            <td style="text-align:center"><input class="rice-inp" type="number" min="0" step="1" value="${get('reach')}" placeholder="—" onchange="onRiceChange('${s.id}','reach',this.value)"></td>
+            <td style="text-align:center"><input class="rice-inp" type="number" min="0.25" max="3" step="0.25" value="${get('impact')}" placeholder="—" onchange="onRiceChange('${s.id}','impact',this.value)"></td>
+            <td style="text-align:center"><input class="rice-inp" type="number" min="0" max="100" step="10" value="${get('conf_pct')}" placeholder="—" onchange="onRiceChange('${s.id}','conf_pct',this.value)"></td>
+            <td class="nilai-cell ${nCls}" id="nv-${s.id}">${nilai > 0 ? nilai : '—'}</td>
+            <td style="text-align:center"><input class="rice-inp" type="number" min="0.1" step="0.1" value="${get('effort')}" placeholder="—" onchange="onRiceChange('${s.id}','effort',this.value)"></td>
+            <td class="rice-final-cell" id="rv-${s.id}">${rice !== null ? `<span class="${rCls}">${rice}</span>` : '<span class="rf-na">isi Effort</span>'}</td>
+            <td><textarea class="saran-ta" rows="2" onchange="onSaranChange('${s.id}',this.value)">${saranVal}</textarea></td>
+          </tr>`;
+        } else {
+          // Subsequent rows: only scope-specific cells
+          tbodyHtml += `<tr>
+            <td class="td-group-no">${rowNo}</td>
+            <td class="td-scope-name">${s.scope || ''}</td>
+            <td style="text-align:center"><input class="rice-inp" type="number" min="0" step="1" value="${get('reach')}" placeholder="—" onchange="onRiceChange('${s.id}','reach',this.value)"></td>
+            <td style="text-align:center"><input class="rice-inp" type="number" min="0.25" max="3" step="0.25" value="${get('impact')}" placeholder="—" onchange="onRiceChange('${s.id}','impact',this.value)"></td>
+            <td style="text-align:center"><input class="rice-inp" type="number" min="0" max="100" step="10" value="${get('conf_pct')}" placeholder="—" onchange="onRiceChange('${s.id}','conf_pct',this.value)"></td>
+            <td class="nilai-cell ${nCls}" id="nv-${s.id}">${nilai > 0 ? nilai : '—'}</td>
+            <td style="text-align:center"><input class="rice-inp" type="number" min="0.1" step="0.1" value="${get('effort')}" placeholder="—" onchange="onRiceChange('${s.id}','effort',this.value)"></td>
+            <td class="rice-final-cell" id="rv-${s.id}">${rice !== null ? `<span class="${rCls}">${rice}</span>` : '<span class="rf-na">isi Effort</span>'}</td>
+            <td><textarea class="saran-ta" rows="2" onchange="onSaranChange('${s.id}',this.value)">${saranVal}</textarea></td>
+          </tr>`;
+        }
+      });
+    });
+  });
+
+  document.getElementById('rice-container').innerHTML = `
+    <div class="tbl-wrap">
+      <table class="rice-main-tbl">
+        ${thead}
+        <tbody>${tbodyHtml}</tbody>
+      </table>
+    </div>`;
 }
 
 function setRiceOwnerFilter(owner) {
@@ -1134,16 +1264,18 @@ function onRiceChange(scopeId, field, val) {
   saveLocal();
   // Recalc display
   const rd2 = DB.rice.find(r => String(r.scope_id) === String(scopeId)) || {};
-  const { nilai, rice } = calcRice(rd2);
+  const { nilai, rice } = getNilaiBisnis(rd2);
   const nEl = document.getElementById('nv-' + scopeId);
   const rEl = document.getElementById('rv-' + scopeId);
-  if (nEl) nEl.textContent = nilai || '—';
+  if (nEl) {
+    nEl.textContent = nilai > 0 ? nilai : '—';
+    nEl.className = 'nilai-cell ' + nilaiClass(nilai);
+  }
   if (rEl) {
-    const rnk = rice >= 20 ? 'HIGH' : rice >= 8 ? 'MID' : rice > 0 ? 'LOW' : 'ZERO';
-    const rnkCls = rice >= 20 ? 'r-high' : rice >= 8 ? 'r-mid' : rice > 0 ? 'r-low' : 'r-zero';
-    rEl.innerHTML = rice > 0
-      ? `<span class="rank ${rnkCls}">${rnk}</span><br><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">${rice}</span>`
-      : '<span style="color:var(--ink3)">—</span>';
+    const rCls = riceClass(rice);
+    rEl.innerHTML = rice !== null
+      ? `<span class="${rCls}">${rice}</span>`
+      : '<span class="rf-na">isi Effort</span>';
   }
   clearTimeout(debounce['rice_' + scopeId + '_' + field]);
   debounce['rice_' + scopeId + '_' + field] = setTimeout(() => pushRiceField(scopeId, field, val), 800);
