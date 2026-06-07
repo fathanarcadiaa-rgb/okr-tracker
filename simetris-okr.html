@@ -504,7 +504,7 @@ const CFG = {
 // ══════════════════════════════════════════════════════
 
 let GAS_URL = localStorage.getItem('simetris_gas_v4') || '';
-let DB = { scopes:[], rice:[], weekly:[], okr:[], kr_weekly:[] };
+let DB = { scopes:[], rice:[], weekly:[], okr:[], kr_weekly:[], item_meta:[] };
 let weekOffset = 0;
 let wFilter = 'all';
 let progFilter = 'all';
@@ -557,15 +557,16 @@ async function loadData() {
   try {
     const data = await gasGet({ action: 'getAll' });
     if (data.error) throw new Error(data.error);
-    DB.scopes  = (data.scopes  || []).filter(r => String(r.active).toLowerCase() !== 'false');
-    DB.rice    = data.rice    || [];
-    DB.weekly  = data.weekly  || [];
-    DB.okr     = data.okr     || [];
+    DB.scopes    = (data.scopes  || []).filter(r => String(r.active).toLowerCase() !== 'false');
+    DB.rice      = data.rice      || [];
+    DB.weekly    = data.weekly    || [];
+    DB.okr       = data.okr       || [];
     DB.kr_weekly = data.kr_weekly || [];
-    
+    DB.item_meta = data.item_meta || [];
+
     // Auto-generate missing weekly log rows untuk minggu ini
     await autoGenerateMissingWeeklyRows();
-    
+
     saveLocal();
     syncStatus('ok');
   } catch(e) {
@@ -1091,14 +1092,44 @@ const ITEM_META_DEFAULT = {
 };
 
 function getItemMeta(item) {
-  const saved = JSON.parse(localStorage.getItem('simetris_item_meta') || '{}');
-  return Object.assign({}, ITEM_META_DEFAULT[item] || {}, saved[item] || {});
+  // Priority: Sheets data (DB.item_meta) > localStorage edits > default
+  const fromSheets = DB.item_meta.find(r => r.item === item) || {};
+  const fromLocal  = JSON.parse(localStorage.getItem('simetris_item_meta') || '{}')[item] || {};
+  const defaults   = ITEM_META_DEFAULT[item] || {};
+  return {
+    stakeholder: fromSheets.stakeholder || fromLocal.stakeholder || defaults.stakeholder || '',
+    user_need:   fromSheets.user_need   || fromLocal.user_need   || defaults.user_need   || '',
+    okr_kr:      fromSheets.okr_kr      || fromLocal.okr_kr      || defaults.okr_kr      || '',
+  };
 }
+
 function saveItemMeta(item, field, val) {
+  // 1. Save to localStorage (immediate)
   const saved = JSON.parse(localStorage.getItem('simetris_item_meta') || '{}');
   if (!saved[item]) saved[item] = {};
   saved[item][field] = val;
   localStorage.setItem('simetris_item_meta', JSON.stringify(saved));
+
+  // 2. Update DB.item_meta local cache
+  const existing = DB.item_meta.find(r => r.item === item);
+  if (existing) { existing[field] = val; }
+  else { DB.item_meta.push({ item, [field]: val }); }
+
+  // 3. Build full meta for this item and push to Sheets
+  const meta = getItemMeta(item);
+  meta[field] = val; // use latest value
+  if (GAS_URL) {
+    clearTimeout(debounce['meta_' + item + '_' + field]);
+    debounce['meta_' + item + '_' + field] = setTimeout(() => {
+      gasPost({
+        action:       'setItemMeta',
+        item,
+        stakeholder:  meta.stakeholder,
+        user_need:    meta.user_need,
+        okr_kr:       meta.okr_kr,
+      });
+    }, 1000);
+  }
 }
 
 function getNilaiBisnis(rd) {
