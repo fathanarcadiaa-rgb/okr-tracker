@@ -504,7 +504,7 @@ const CFG = {
 // ══════════════════════════════════════════════════════
 
 let GAS_URL = localStorage.getItem('simetris_gas_v4') || '';
-let DB = { scopes:[], rice:[], weekly:[], okr:[], kr_weekly:[], item_meta:[] };
+let DB = { scopes:[], rice:[], rice_modelling:[], weekly:[], okr:[], kr_weekly:[], item_meta:[] };
 let weekOffset = 0;
 let wFilter = 'all';
 let progFilter = 'all';
@@ -557,16 +557,38 @@ async function loadData() {
   try {
     const data = await gasGet({ action: 'getAll' });
     if (data.error) throw new Error(data.error);
-    DB.scopes    = (data.scopes  || []).filter(r => String(r.active).toLowerCase() !== 'false');
-    DB.rice      = data.rice      || [];
-    DB.weekly    = data.weekly    || [];
-    DB.okr       = data.okr       || [];
+    DB.scopes  = (data.scopes || []).filter(r => String(r.active).toLowerCase() !== 'false');
+    DB.weekly  = data.weekly    || [];
+    DB.okr     = data.okr       || [];
     DB.kr_weekly = data.kr_weekly || [];
-    DB.item_meta = data.item_meta || [];
 
-    // Auto-generate missing weekly log rows untuk minggu ini
+    // rice_modelling = satu sheet untuk semua RICE data
+    const rm = data.rice_modelling || [];
+    DB.rice_modelling = rm;
+
+    // Derive DB.rice (untuk backward compat onRiceChange, pushRiceField etc.)
+    DB.rice = rm.map(r => ({
+      scope_id:     r.scope_id,
+      reach:        r.reach,
+      impact:       r.impact,
+      conf_pct:     r.conf_pct,
+      effort:       r.effort,
+      nilai_bisnis: r.nilai_bisnis,
+      rice_score:   r.rice_score,
+      saran:        r.saran,
+    }));
+
+    // Derive DB.item_meta (grouped by item, first occurrence wins)
+    DB.item_meta = [];
+    const seenItems = new Set();
+    rm.forEach(r => {
+      if (r.item && !seenItems.has(r.item)) {
+        seenItems.add(r.item);
+        DB.item_meta.push({ item: r.item, stakeholder: r.stakeholder, user_need: r.user_need, okr_kr: r.okr_kr });
+      }
+    });
+
     await autoGenerateMissingWeeklyRows();
-
     saveLocal();
     syncStatus('ok');
   } catch(e) {
